@@ -1,10 +1,26 @@
+from http import HTTPStatus
+
 from fastapi import APIRouter
+
+from service_provider_api.schemas.base import ErrorResponse
+from service_provider_api.schemas.service_provider.service_provider import (
+    ServiceProviderSchema,
+)
+from service_provider_api.schemas.service_provider.new_service_provider import (
+    NewServiceProviderInSchema,
+)
 
 router = APIRouter("/service-provider")
 
 
-@router.post("")
-async def create_service_provider() -> dict:
+@router.post(
+    "",
+    models={
+        HTTPStatus.CREATED: {"model": ServiceProviderSchema},
+        HTTPStatus.INTERNAL_SERVER_ERROR: {"model": ErrorResponse},
+    },
+)
+async def create_service_provider(provider: NewServiceProviderInSchema) -> dict:
     pass
 
 

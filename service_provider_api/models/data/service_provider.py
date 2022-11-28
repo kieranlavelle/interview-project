@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import BaseModel
 
@@ -24,6 +25,7 @@ class ServiceProviderModel(BaseModel):
     displaying data on the front end.
     """
 
+    id: UUID
     name: str
     skills: list[str]
     cost_in_pence: int
@@ -32,6 +34,7 @@ class ServiceProviderModel(BaseModel):
 
     def as_dict(self) -> dict:
         return {
+            "id": self.id,
             "name": self.name,
             "skills": self.skills,
             "cost_in_pence": self.cost_in_pence,
