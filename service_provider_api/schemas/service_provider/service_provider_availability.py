@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 from service_provider_api.schemas.base import BaseSchema
 from pydantic import root_validator
@@ -7,8 +7,8 @@ from pydantic import root_validator
 class ServiceProviderAvailabilitySchema(BaseSchema):
     """Availability of a service provider"""
 
-    from_date: datetime
-    to_date: datetime
+    from_date: date
+    to_date: date
 
     @root_validator
     def validate_dates(cls, values: dict) -> dict:

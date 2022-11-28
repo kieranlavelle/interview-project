@@ -1,39 +1,34 @@
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.dialects.postgresql import UUID, A
-from sqlalchemy import (
-    Column,
-    Integer,
-    Float,
-    String,
-    DateTime,
-    ForeignKey,
-)
+INSERT_SERVICE_PROVIDER = """INSERT INTO service_providers (id, user_id, name, cost_in_pence, review_rating) VALUES (%(id)s, %(user_id)s, %(name)s, %(cost_in_pence)s, %(review_rating)s);"""
+INSERT_SERVICE_PROVIDER_SKILL = """INSERT INTO service_provider_skills (service_provider_id, skill) VALUES (%(service_provider_id)s, %(skill)s);"""
+INSERT_SERVICE_PROVIDER_AVAILABILITY = """INSERT INTO service_provider_availability (service_provider_id, availability) VALUES (%(service_provider_id)s, %(availability)s);"""
 
-Model = declarative_base(name="Model")
+DELETE_SERVICE_PROVIDER = """DELETE FROM service_providers WHERE id = %(id)s AND user_id = %(user_id)s CASCADE;"""
 
-
-class ServiceProviderDBModel(Model):
-    __tablename__ = "service_providers"
-    id = Column("id", UUID, primary_key=True)
-    name = Column("name", String)
-    cost_in_pence = Column("cost_in_pence", Integer)
-    review_rating = Column("review_rating", Float)
-
-
-class ServiceProvideSkillsDBModel(Model):
-    __tablename__ = "service_provider_skills"
-    id = Column("id", UUID, primary_key=True)
-    service_provider_id = Column(
-        "service_provider_id", UUID, ForeignKey("service_providers.id")
-    )
-    skill = Column("skill", String)
-
-
-class ServiceProviderAvailabilityDBModel(Model):
-    __tablename__ = "service_provider_availability"
-    id = Column("id", UUID, primary_key=True)
-    service_provider_id = Column(
-        "service_provider_id", UUID, ForeignKey("service_providers.id")
-    )
-    from_date = Column("from_date", DateTime)
-    to_date = Column("to_date", DateTime)
+SELECT_SERVICE_PROVIDER = """
+SELECT
+	sp.id,
+    sp.user_id,
+	sp.name,
+	sp.cost_in_pence,
+    sp.review_rating,
+	ARRAY(
+        SELECT
+            skill 
+        FROM 
+            service_provider_skills sps
+        WHERE sps.service_provider_id = sp.id
+    ) AS skills,
+	ARRAY(
+        SELECT
+            availability
+        FROM 
+            service_provider_availability spa
+        WHERE spa.service_provider_id = sp.id
+    ) AS availability 
+FROM
+	service_providers sp
+WHERE
+    sp.id = %(id)s
+AND
+    sp.user_id = %(user_id)s;
+"""

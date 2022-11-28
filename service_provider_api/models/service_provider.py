@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -7,13 +7,13 @@ from pydantic import BaseModel
 class ServiceProviderAvailabilityRange(BaseModel):
     """Availability of a service provider"""
 
-    from_date: datetime
-    to_date: datetime
+    from_date: date
+    to_date: date
 
     def as_dict(self) -> dict:
         return {
-            "from_date": self.from_date,
-            "to_date": self.to_date,
+            "from_date": self.from_date.isoformat(),
+            "to_date": self.to_date.isoformat(),
         }
 
 
@@ -26,16 +26,17 @@ class ServiceProviderModel(BaseModel):
     """
 
     id: UUID
+    user_id: UUID
     name: str
     skills: list[str]
     cost_in_pence: int
     availability: list[ServiceProviderAvailabilityRange]
-    review_rating: float
+    review_rating: int
 
     def as_dict(self) -> dict:
         return {
-            "id": self.id,
             "name": self.name,
+            "user_id": self.user_id,
             "skills": self.skills,
             "cost_in_pence": self.cost_in_pence,
             "availability": [dates.as_dict() for dates in self.availability],
