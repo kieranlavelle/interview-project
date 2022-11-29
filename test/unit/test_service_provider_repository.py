@@ -5,13 +5,11 @@ from sqlalchemy.orm import Session
 
 from service_provider_api import models
 from service_provider_api.repositories.service_provider import ServiceProviderRepository
-from service_provider_api.schemas.new_service_provider import (
-    NewServiceProviderInSchema,
-)
+from service_provider_api import schemas
 
 
 def test_can_create_service_provider(
-    service_provider: NewServiceProviderInSchema, user_id: UUID, db_connection: Session
+    service_provider: schemas.NewServiceProviderInSchema, user_id: UUID, db_connection: Session
 ) -> None:
 
     # setup

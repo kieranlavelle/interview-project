@@ -7,8 +7,7 @@ from sqlalchemy import exc
 import structlog
 
 from service_provider_api import models
-from service_provider_api.schemas.service_provider import ServiceProviderSchema
-from service_provider_api.schemas.new_service_provider import NewServiceProviderInSchema
+from service_provider_api import schemas
 
 log = structlog.get_logger()
 
@@ -31,7 +30,7 @@ class FailedToDeleteServiceProvider(Exception):
 
 class ServiceProviderRepository:
     @staticmethod
-    def new(provider: NewServiceProviderInSchema, user_id: UUID, db: Session) -> models.ServiceProvider:
+    def new(provider: schemas.NewServiceProviderInSchema, user_id: UUID, db: Session) -> models.ServiceProvider:
         """Creates a new service provider in the database.
 
         Args:
@@ -105,7 +104,9 @@ class ServiceProviderRepository:
             raise FailedToDeleteServiceProvider from e
 
     @staticmethod
-    def put(updated_service_provider: ServiceProviderSchema, user_id: UUID, db: Session) -> models.ServiceProvider:
+    def put(
+        updated_service_provider: schemas.ServiceProviderSchema, user_id: UUID, db: Session
+    ) -> models.ServiceProvider:
         """Updates a service provider in the database.
 
         Args:
@@ -146,7 +147,7 @@ class ServiceProviderRepository:
     ### private methods
     @staticmethod
     def _insert_service_provider(
-        service_provider: models.ServiceProvider, service_provider_schema: ServiceProviderSchema, db: Session
+        service_provider: models.ServiceProvider, service_provider_schema: schemas.ServiceProviderSchema, db: Session
     ) -> models.ServiceProvider:
 
         db.add(service_provider)

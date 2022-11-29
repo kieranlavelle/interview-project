@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import exc
 
 from service_provider_api import models
-from service_provider_api.schemas.service_provider_review import NewServiceProviderReview
+from service_provider_api import schemas
 from service_provider_api.repositories.service_provider import ServiceProviderRepository
 
 log = structlog.get_logger()
@@ -18,7 +18,7 @@ class FailedToCreateReview(Exception):
 class ServiceProviderReviewRepository:
     @staticmethod
     def new(
-        service_provider_id: UUID, provider: NewServiceProviderReview, user_id: UUID, db: Session
+        service_provider_id: UUID, provider: schemas.NewServiceProviderReview, user_id: UUID, db: Session
     ) -> models.ServiceProvider:
         """Create a new service provider review.
 

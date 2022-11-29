@@ -8,11 +8,7 @@ from service_provider_api import models
 from service_provider_api.repositories.service_provider import ServiceProviderRepository
 from service_provider_api.repositories.service_provider_review import ServiceProviderReviewRepository
 from service_provider_api.utils.database import Base, engine, SessionLocal
-from service_provider_api.schemas.new_service_provider import (
-    NewServiceProviderInSchema,
-    ServiceProviderAvailabilitySchema,
-)
-from service_provider_api.schemas.service_provider_review import NewServiceProviderReview
+from service_provider_api import schemas
 
 
 @pytest.fixture(autouse=True)
@@ -39,17 +35,17 @@ def user_id() -> str:
 
 
 @pytest.fixture
-def service_provider() -> NewServiceProviderInSchema:
-    return NewServiceProviderInSchema(
+def service_provider() -> schemas.NewServiceProviderInSchema:
+    return schemas.NewServiceProviderInSchema(
         name="John Smith",
         skills=["plumbing", "electrical"],
         cost_in_pence=1000,
         availability=[
-            ServiceProviderAvailabilitySchema(
+            schemas.ServiceProviderAvailabilitySchema(
                 from_date=date(2021, 1, 1),
                 to_date=date(2021, 1, 2),
             ),
-            ServiceProviderAvailabilitySchema(
+            schemas.ServiceProviderAvailabilitySchema(
                 from_date=date(2021, 1, 3),
                 to_date=date(2021, 1, 4),
             ),
@@ -58,8 +54,8 @@ def service_provider() -> NewServiceProviderInSchema:
 
 
 @pytest.fixture
-def service_provider_review() -> NewServiceProviderReview:
-    return NewServiceProviderReview(
+def service_provider_review() -> schemas.NewServiceProviderReview:
+    return schemas.NewServiceProviderReview(
         rating=5,
     )
 
@@ -71,7 +67,7 @@ def service_provider_review() -> NewServiceProviderReview:
 
 @pytest.fixture
 def create_service_provider_in_db(
-    service_provider: NewServiceProviderInSchema, user_id: UUID, db_connection: Session
+    service_provider: schemas.NewServiceProviderInSchema, user_id: UUID, db_connection: Session
 ) -> models.ServiceProvider:
     return ServiceProviderRepository.new(service_provider, user_id, db_connection)
 
@@ -79,7 +75,7 @@ def create_service_provider_in_db(
 @pytest.fixture
 def create_service_provider_reviews_in_db(
     create_service_provider_in_db: models.ServiceProvider,
-    service_provider_review: NewServiceProviderReview,
+    service_provider_review: schemas.NewServiceProviderReview,
     db_connection: Session,
 ) -> models.Reviews:
 
