@@ -1,8 +1,10 @@
 from http import HTTPStatus
 from uuid import UUID
+from typing import Optional
+from datetime import date
 
 import structlog
-from fastapi import APIRouter, Depends, Header, Response
+from fastapi import APIRouter, Depends, Header, Response, Query
 from sqlalchemy.orm import Session
 
 from service_provider_api.dependencies import get_db
@@ -18,6 +20,7 @@ from service_provider_api.repositories.service_provider_review import (
 from service_provider_api import schemas
 
 router = APIRouter(prefix="/service-provider")
+router_2 = APIRouter(prefix="/service-providers")
 log = structlog.get_logger()
 
 
@@ -142,6 +145,24 @@ async def delete_service_provider(
         return schemas.ErrorResponse(error="Service provider not found")
 
 
-@router.get("/search")
-async def search_service_provider() -> dict:
-    pass
+@router_2.get("/list")
+async def search_service_provider(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1),
+    name: Optional[str] = None,
+    skills: list[str] = Query(default=[]),
+    cost_gt: Optional[int] = None,
+    cost_lt: Optional[int] = None,
+    availability_: Optional[list[tuple[date, date]]] = None,
+    reviews_greater_than: Optional[int] = None,
+    reviews_less_than: Optional[int] = None,
+    db: Session = Depends(get_db),
+) -> dict:
+
+    # validate the cost ranges
+    if cost_gt is not None and cost_lt is not None:
+        if cost_lt >= cost_gt:
+            return schemas.ErrorResponse(error="cost_lt must be less than cost_gt")
+
+    service_providers = ServiceProviderRepository.list(db, page, page_size, name, skills, cost_lt, cost_gt)
+    return schemas.ServiceProvidersList(service_providers=[s.as_dict() for s in service_providers])

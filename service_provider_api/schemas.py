@@ -78,3 +78,9 @@ class ServiceProviderReview(BaseSchema):
 
     rating: float
     user_id: UUID
+
+
+class ServiceProvidersList(BaseSchema):
+    """Schema for new service provider review requests."""
+
+    service_providers: list[ServiceProviderSchema]

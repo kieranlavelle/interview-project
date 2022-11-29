@@ -11,6 +11,7 @@ setup_logging()
 
 app = FastAPI(title="Service Provider API")
 app.include_router(service_provider_endpoints.router)
+app.include_router(service_provider_endpoints.router_2)
 
 
 @app.get("/health")

@@ -51,7 +51,7 @@ class ServiceProviderRepository:
                 cost_in_pence=provider.cost_in_pence,
             )
 
-            with db.begin():
+            with db.begin_nested():
                 session_provider = ServiceProviderRepository._insert_service_provider(service_provider, provider, db)
 
             db.refresh(session_provider)
@@ -83,6 +83,8 @@ class ServiceProviderRepository:
             service_provider = (
                 db.query(models.ServiceProvider).filter(models.ServiceProvider.id == service_provider_id).first()
             )
+
+        db.close()
 
         if not service_provider:
             raise ServiceProviderNotFound
@@ -138,6 +140,14 @@ class ServiceProviderRepository:
             # this is a put, so we delete everything and then re-insert it in a transaction
             with db.begin():
                 db.delete(service_provider)
+
+                service_provider = models.ServiceProvider(
+                    id=service_provider_id,
+                    user_id=user_id,
+                    name=updated_service_provider.name,
+                    cost_in_pence=updated_service_provider.cost_in_pence,
+                )
+
                 service_provider = ServiceProviderRepository._insert_service_provider(
                     service_provider, updated_service_provider, db
                 )
@@ -148,7 +158,54 @@ class ServiceProviderRepository:
         except exc.SQLAlchemyError as e:
             raise FailedToUpdateServiceProvider from e
 
-    ### private methods
+    @staticmethod
+    def list(
+        db: Session,
+        page: int,
+        page_size: int,
+        name_filter: Optional[str] = None,
+        skills_filter: Optional[str] = None,
+        cost_lt_filter: Optional[int] = None,
+        cost_gt_filter: Optional[int] = None,
+    ) -> list[models.ServiceProvider]:
+        """Gets all service providers from the database.
+
+        Args:
+            db (Session): The database session.
+
+        Returns:
+            list[models.ServiceProvider]: A list of service providers.
+        """
+
+        # calculate the offset
+        offset = (page - 1) * page_size
+
+        service_providers_query = db.query(models.ServiceProvider)
+
+        # create all of the conditions for the query
+        conditions = []
+        if name_filter:
+            conditions.append(models.ServiceProvider.name == name_filter)
+        if cost_gt_filter is not None:
+            conditions.append(models.ServiceProvider.cost_in_pence > cost_gt_filter)
+        if cost_lt_filter is not None:
+            conditions.append(models.ServiceProvider.cost_in_pence < cost_lt_filter)
+
+        # relationship filters have to work using joins as sqlalchemy doesn't support
+        # filtering on relationships with the in_ operator
+        if skills_filter:
+            service_providers_query = service_providers_query.join(models.Skills).filter(
+                models.Skills.skill.in_(skills_filter)
+            )
+
+        service_providers_query = service_providers_query.filter(*conditions)
+        service_providers = service_providers_query.offset(offset).limit(page_size).all()
+
+        return service_providers
+
+    #######################
+    ### private methods ###
+    #######################
     @staticmethod
     def _insert_service_provider(
         service_provider: models.ServiceProvider, service_provider_schema: schemas.ServiceProviderSchema, db: Session

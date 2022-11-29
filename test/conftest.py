@@ -54,6 +54,42 @@ def service_provider() -> schemas.NewServiceProviderInSchema:
 
 
 @pytest.fixture
+def multiple_service_providers() -> list[schemas.NewServiceProviderInSchema]:
+    return [
+        schemas.NewServiceProviderInSchema(
+            name="John Smith",
+            skills=["plumbing", "electrical"],
+            cost_in_pence=1000,
+            availability=[
+                schemas.ServiceProviderAvailabilitySchema(
+                    from_date=date(2021, 1, 1),
+                    to_date=date(2021, 1, 2),
+                ),
+                schemas.ServiceProviderAvailabilitySchema(
+                    from_date=date(2021, 1, 3),
+                    to_date=date(2021, 1, 4),
+                ),
+            ],
+        ),
+        schemas.NewServiceProviderInSchema(
+            name="Dean Greene",
+            skills=["IT Services", "SEO"],
+            cost_in_pence=2000,
+            availability=[
+                schemas.ServiceProviderAvailabilitySchema(
+                    from_date=date(2022, 1, 1),
+                    to_date=date(2022, 1, 2),
+                ),
+                schemas.ServiceProviderAvailabilitySchema(
+                    from_date=date(2022, 1, 3),
+                    to_date=date(2022, 1, 4),
+                ),
+            ],
+        ),
+    ]
+
+
+@pytest.fixture
 def service_provider_review() -> schemas.NewServiceProviderReview:
     return schemas.NewServiceProviderReview(
         rating=5,
@@ -70,6 +106,18 @@ def create_service_provider_in_db(
     service_provider: schemas.NewServiceProviderInSchema, user_id: UUID, db_connection: Session
 ) -> models.ServiceProvider:
     return ServiceProviderRepository.new(service_provider, user_id, db_connection)
+
+
+@pytest.fixture
+def create_multiple_service_providers_in_db(
+    multiple_service_providers: list[schemas.NewServiceProviderInSchema], user_id: UUID, db_connection: Session
+) -> list[models.ServiceProvider]:
+    providers = [
+        ServiceProviderRepository.new(provider, user_id, db_connection) for provider in multiple_service_providers
+    ]
+    db_connection.commit()
+    db_connection.close()
+    return providers
 
 
 @pytest.fixture
