@@ -31,7 +31,7 @@ async def search_service_provider(
 ) -> dict:
     log.info("Searching for recommended service providers", params=params)
 
-    max_cost_per_day = params.job_budget_in_pence / params.job_duration_in_days
+    max_cost_per_day = params.job_budget_in_pence / params.expected_job_duration_in_days
     filters = ListFilterParams(
         page=params.page,
         page_size=params.page_size,
