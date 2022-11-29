@@ -8,6 +8,7 @@ class BaseSchema(BaseModel):
             # orjson.dumps returns bytes, to match standard json.dumps we need to decode
             return orjson.dumps(v, default=default).decode()
 
+        orm_mode = True
         arbitrary_types_allowed = True
         json_dumps = orjson_dumps
         allow_population_by_field_name = True

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from service_provider_api import models
 from service_provider_api.repositories.service_provider import ServiceProviderRepository
-from service_provider_api.schemas.service_provider.new_service_provider import (
+from service_provider_api.schemas.new_service_provider import (
     NewServiceProviderInSchema,
 )
 
@@ -21,7 +21,7 @@ def test_can_create_service_provider(
     assert isinstance(new_service_provider, models.ServiceProvider)
 
     # check that the returned service provider is in the database
-    db_service_provider = ServiceProviderRepository.get(new_service_provider.id, user_id, db_connection)
+    db_service_provider = ServiceProviderRepository.get(new_service_provider.id, db_connection)
     if not isinstance(db_service_provider, models.ServiceProvider):
         pytest.fail("Service provider not found in database")
 

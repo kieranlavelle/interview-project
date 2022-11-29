@@ -4,12 +4,13 @@ from uuid import uuid4, UUID
 from psycopg2.extras import DateRange
 from sqlalchemy.orm import Session
 from sqlalchemy import exc
+import structlog
 
 from service_provider_api import models
-from service_provider_api.schemas.service_provider.service_provider import ServiceProviderSchema
-from service_provider_api.schemas.service_provider.new_service_provider import NewServiceProviderInSchema
+from service_provider_api.schemas.service_provider import ServiceProviderSchema
+from service_provider_api.schemas.new_service_provider import NewServiceProviderInSchema
 
-# TODO: Add logging
+log = structlog.get_logger()
 
 
 class FailedToCreateServiceProvider(Exception):
@@ -60,13 +61,25 @@ class ServiceProviderRepository:
             raise FailedToCreateServiceProvider from e
 
     @staticmethod
-    def get(service_provider_id: UUID, user_id: UUID, db: Session) -> models.ServiceProvider:
+    def get(service_provider_id: UUID, db: Session) -> models.ServiceProvider:
+        """Gets a service provider from the database.
 
-        return (
-            db.query(models.ServiceProvider)
-            .filter(models.ServiceProvider.id == service_provider_id, models.ServiceProvider.user_id == user_id)
-            .first()
+        Args:
+            service_provider_id (UUID): The ID of the service provider to get.
+            db (Session): The database connection.
+
+        Raises:
+            ServiceProviderNotFound: If the service provider could not be found.
+        """
+
+        service_provider = (
+            db.query(models.ServiceProvider).filter(models.ServiceProvider.id == service_provider_id).first()
         )
+
+        if not service_provider:
+            raise ServiceProviderNotFound
+
+        return service_provider
 
     @staticmethod
     def delete(service_provider_id: UUID, user_id: UUID, db: Session) -> None:

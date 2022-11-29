@@ -19,6 +19,11 @@ class ServiceProvider(Base):
     availability = relationship("Availability", backref="service_provider", cascade="all, delete-orphan")
     review_rating = relationship("Reviews", backref="service_provider", cascade="all, delete-orphan")
 
+    def _calculate_review_rating(self) -> float:
+        if len(self.review_rating):
+            return sum(r.rating for r in self.review_rating) / len(self.review_rating)
+        return 0.0
+
     def as_dict(self) -> dict:
         return {
             "id": self.id,
@@ -27,7 +32,7 @@ class ServiceProvider(Base):
             "cost_in_pence": self.cost_in_pence,
             "skills": [skill.skill for skill in self.skills],
             "availability": [availability.as_dict() for availability in self.availability],
-            "review_rating": self.review_rating,
+            "review_rating": self._calculate_review_rating(),
         }
 
 

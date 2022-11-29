@@ -1,17 +1,16 @@
-from uuid import UUID
+"""Module to contain schemas for new service provider requests."""
+
 
 from service_provider_api.schemas.base import BaseSchema
-from service_provider_api.schemas.service_provider.service_provider_availability import (
+from service_provider_api.schemas.service_provider_availability import (
     ServiceProviderAvailabilitySchema,
 )
 
 
-class ServiceProviderSchema(BaseSchema):
+class NewServiceProviderInSchema(BaseSchema):
     """Schema for new service provider requests."""
 
-    id: UUID
     name: str
     skills: list[str]
     cost_in_pence: int
     availability: list[ServiceProviderAvailabilitySchema]
-    review_rating: list
