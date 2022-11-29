@@ -1,5 +1,5 @@
 from uuid import uuid4, UUID
-
+from typing import Optional
 
 from psycopg2.extras import DateRange
 from sqlalchemy.orm import Session
@@ -60,20 +60,29 @@ class ServiceProviderRepository:
             raise FailedToCreateServiceProvider from e
 
     @staticmethod
-    def get(service_provider_id: UUID, db: Session) -> models.ServiceProvider:
+    def get(service_provider_id: UUID, db: Session, user_id: Optional[UUID] = None) -> models.ServiceProvider:
         """Gets a service provider from the database.
 
         Args:
             service_provider_id (UUID): The ID of the service provider to get.
             db (Session): The database connection.
+            user_id (Optional[UUID], optional): The user id of the user getting the service provider. Defaults to None.
 
         Raises:
             ServiceProviderNotFound: If the service provider could not be found.
         """
 
-        service_provider = (
-            db.query(models.ServiceProvider).filter(models.ServiceProvider.id == service_provider_id).first()
-        )
+        if user_id:
+            # we want to make sure the calling user owns this service provider resource
+            service_provider = (
+                db.query(models.ServiceProvider)
+                .filter(models.ServiceProvider.id == service_provider_id, models.ServiceProvider.user_id == user_id)
+                .first()
+            )
+        else:
+            service_provider = (
+                db.query(models.ServiceProvider).filter(models.ServiceProvider.id == service_provider_id).first()
+            )
 
         if not service_provider:
             raise ServiceProviderNotFound
@@ -93,12 +102,13 @@ class ServiceProviderRepository:
             FailedToDeleteServiceProvider: If the service provider could not be deleted."""
 
         try:
-            service_provider = ServiceProviderRepository.get(service_provider_id, user_id, db)
-            db.commit()
+            service_provider = ServiceProviderRepository.get(service_provider_id, db, user_id)
             if not service_provider:
+                # the service provider does not exist, or the user does not own it
                 raise ServiceProviderNotFound
 
             db.delete(service_provider)
+            db.commit()
 
         except exc.SQLAlchemyError as e:
             raise FailedToDeleteServiceProvider from e

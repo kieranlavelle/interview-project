@@ -1,4 +1,4 @@
-from uuid import uuid4, UUID
+from uuid import UUID
 
 import structlog
 from sqlalchemy.orm import Session
@@ -12,6 +12,8 @@ log = structlog.get_logger()
 
 
 class FailedToCreateReview(Exception):
+    """Raised when a review cannot be created."""
+
     pass
 
 
@@ -40,7 +42,6 @@ class ServiceProviderReviewRepository:
 
             # create the service provider review
             service_provider_review = models.Reviews(
-                id=uuid4(),
                 service_provider_id=service_provider_id,
                 user_id=user_id,
                 rating=provider.rating,

@@ -98,9 +98,26 @@ async def update_service_provider(service_provider_id: UUID) -> dict:
     pass
 
 
-@router.delete("/{service_provider_id}")
-async def delete_service_provider(service_provider_id: UUID) -> dict:
-    pass
+@router.delete(
+    "/{service_provider_id}",
+    responses={HTTPStatus.OK: {}, HTTPStatus.NOT_FOUND: {"Model": schemas.ErrorResponse}},
+)
+async def delete_service_provider(
+    service_provider_id: UUID,
+    response: Response,
+    user_id: UUID = Header(),
+    db: Session = Depends(get_db),
+) -> dict:
+
+    try:
+        ServiceProviderRepository.delete(service_provider_id, user_id, db)
+        response.status_code = HTTPStatus.OK
+        return {}
+    except ServiceProviderNotFound:
+        # return 404 if the service provider doesn't exist or the user doesn't own it
+        # we don't want to do UNAUTHORIZED here as we don't want to leak information
+        response.status_code = HTTPStatus.NOT_FOUND
+        return schemas.ErrorResponse(error="Service provider not found")
 
 
 @router.get("/search")
