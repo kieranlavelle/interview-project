@@ -15,11 +15,3 @@ class NewServiceProviderInSchema(BaseSchema):
     skills: list[str]
     cost_in_pence: int
     availability: list[ServiceProviderAvailabilitySchema]
-    review_rating: float
-
-    @validator("review_rating")
-    def validate_rating_is_between_0_and_5(cls, value: float) -> float:
-        """Validate that the review rating is between 0 and 5."""
-        if value < 0 or value > 5:
-            raise ValueError("Review rating must be between 0 and 5.")
-        return value

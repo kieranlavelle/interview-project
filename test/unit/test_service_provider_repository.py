@@ -1,8 +1,9 @@
-from uuid import uuid4
+from uuid import UUID
 
 import pytest
+from sqlalchemy.orm import Session
 
-from service_provider_api.models.service_provider import ServiceProviderModel
+from service_provider_api import models
 from service_provider_api.repositories.service_provider import ServiceProviderRepository
 from service_provider_api.schemas.service_provider.new_service_provider import (
     NewServiceProviderInSchema,
@@ -10,24 +11,18 @@ from service_provider_api.schemas.service_provider.new_service_provider import (
 
 
 def test_can_create_service_provider(
-    example_service_provider_schema_fixture: NewServiceProviderInSchema,
+    service_provider: NewServiceProviderInSchema, user_id: UUID, db_connection: Session
 ) -> None:
 
-    user_id = uuid4()
-
     # setup
-    new_service_provider = ServiceProviderRepository.new(
-        example_service_provider_schema_fixture, user_id
-    )
+    new_service_provider = ServiceProviderRepository.new(service_provider, user_id, db_connection)
 
     # check we get the correct type back
-    assert isinstance(new_service_provider, ServiceProviderModel)
+    assert isinstance(new_service_provider, models.ServiceProvider)
 
     # check that the returned service provider is in the database
-    db_service_provider = ServiceProviderRepository.get(
-        new_service_provider.id, user_id
-    )
-    if not isinstance(db_service_provider, ServiceProviderModel):
+    db_service_provider = ServiceProviderRepository.get(new_service_provider.id, user_id, db_connection)
+    if not isinstance(db_service_provider, models.ServiceProvider):
         pytest.fail("Service provider not found in database")
 
     # check that the returned service provider is the same as the one we created

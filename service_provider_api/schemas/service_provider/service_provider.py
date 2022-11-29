@@ -14,4 +14,4 @@ class ServiceProviderSchema(BaseSchema):
     skills: list[str]
     cost_in_pence: int
     availability: list[ServiceProviderAvailabilitySchema]
-    review_rating: float
+    review_rating: list
