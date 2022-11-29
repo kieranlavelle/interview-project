@@ -8,7 +8,7 @@ from sqlalchemy import exc
 from sqlalchemy.sql import func
 import structlog
 
-from service_provider_api.dependencies import ListFilterParams, list_pairs
+from service_provider_api.dependencies import ListFilterParams, ServiceProviderRecomendationParams, list_pairs
 from service_provider_api import models
 from service_provider_api import schemas
 
@@ -77,6 +77,7 @@ class ServiceProviderRepository:
 
         if user_id:
             # we want to make sure the calling user owns this service provider resource
+            # if the user_id has been provided.
             service_provider = (
                 db.query(models.ServiceProvider)
                 .filter(models.ServiceProvider.id == service_provider_id, models.ServiceProvider.user_id == user_id)
@@ -174,8 +175,7 @@ class ServiceProviderRepository:
             list[models.ServiceProvider]: A list of service providers.
         """
 
-        # calculate the offset
-        offset = (filters.page - 1) * filters.page_size
+        offset = ServiceProviderRepository._calculate_offset(filters.page, filters.page_size)
 
         # create all of the conditions for the query
         conditions = ServiceProviderRepository._generate_conditions_for_listing(filters)
@@ -188,6 +188,20 @@ class ServiceProviderRepository:
     #######################
     ### private methods ###
     #######################
+
+    @staticmethod
+    def _calculate_offset(page: int, page_size: int) -> int:
+        """Calculates the offset for a query.
+
+        Args:
+            page (int): The page number.
+            page_size (int): The page size.
+
+        Returns:
+            int: The offset.
+        """
+
+        return (page - 1) * page_size
 
     @staticmethod
     def _perform_joins_for_listing(filters: ListFilterParams, db: Session):

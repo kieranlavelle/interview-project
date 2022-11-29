@@ -30,5 +30,16 @@ async def search_service_provider(
     db: Session = Depends(get_db),
 ) -> dict:
     log.info("Searching for recommended service providers", params=params)
-    service_providers = ServiceProviderRepository.list(db, params)
+
+    max_cost_per_day = params.job_budget_in_pence / params.job_duration_in_days
+    filters = ListFilterParams(
+        page=params.page,
+        page_size=params.page_size,
+        reviews_gt=params.minimum_review_rating,
+        skills=params.skills,
+        cost_lt=max_cost_per_day,
+        availability=params.availability,
+    )
+
+    service_providers = ServiceProviderRepository.list(db, filters)
     return schemas.ServiceProvidersList(service_providers=[s.as_dict() for s in service_providers])

@@ -33,7 +33,7 @@ class ServiceProviderRecomendationParams:
     job_budget_in_pence: int = Query(ge=1)
     skills: list[str] = Query()
     availability: list[date] = Query()
-    minimum_review_rating: Optional[float] = Query(default=5, le=5, ge=0)
+    minimum_review_rating: Optional[float] = Query(default=0, le=5, ge=0)
 
     # validate the availability ranges
     @validator("availability")
