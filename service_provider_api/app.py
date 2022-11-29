@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from service_provider_api.endpoints import service_provider_endpoints
+from service_provider_api.endpoints import service_provider, service_provider_aggregations
 from service_provider_api.utils.database import Base, engine
 from service_provider_api.log_setup import setup_logging
 
@@ -10,8 +10,8 @@ setup_logging()
 
 
 app = FastAPI(title="Service Provider API")
-app.include_router(service_provider_endpoints.router)
-app.include_router(service_provider_endpoints.router_2)
+app.include_router(service_provider.router)
+app.include_router(service_provider_aggregations.router)
 
 
 @app.get("/health")

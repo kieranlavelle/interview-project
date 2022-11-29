@@ -1,11 +1,14 @@
 from uuid import uuid4, UUID
 from typing import Optional
+from datetime import date
 
 from psycopg2.extras import DateRange
 from sqlalchemy.orm import Session
 from sqlalchemy import exc
+from sqlalchemy.sql import func
 import structlog
 
+from service_provider_api.dependencies import ListFilterParams, list_pairs
 from service_provider_api import models
 from service_provider_api import schemas
 
@@ -159,51 +162,77 @@ class ServiceProviderRepository:
     @staticmethod
     def list(
         db: Session,
-        page: int,
-        page_size: int,
-        name_filter: Optional[str] = None,
-        skills_filter: Optional[str] = None,
-        cost_lt_filter: Optional[int] = None,
-        cost_gt_filter: Optional[int] = None,
+        filters: ListFilterParams,
     ) -> list[models.ServiceProvider]:
         """Gets all service providers from the database.
 
         Args:
             db (Session): The database session.
+            filters (ListFilterParams): The filters to apply to the query.
 
         Returns:
             list[models.ServiceProvider]: A list of service providers.
         """
 
         # calculate the offset
-        offset = (page - 1) * page_size
-
-        service_providers_query = db.query(models.ServiceProvider)
+        offset = (filters.page - 1) * filters.page_size
 
         # create all of the conditions for the query
-        conditions = []
-        if name_filter:
-            conditions.append(models.ServiceProvider.name == name_filter)
-        if cost_gt_filter is not None:
-            conditions.append(models.ServiceProvider.cost_in_pence > cost_gt_filter)
-        if cost_lt_filter is not None:
-            conditions.append(models.ServiceProvider.cost_in_pence < cost_lt_filter)
-
-        # relationship filters have to work using joins as sqlalchemy doesn't support
-        # filtering on relationships with the in_ operator
-        if skills_filter:
-            service_providers_query = service_providers_query.join(models.Skills).filter(
-                models.Skills.skill.in_(skills_filter)
-            )
-
+        conditions = ServiceProviderRepository._generate_conditions_for_listing(filters)
+        service_providers_query = ServiceProviderRepository._perform_joins_for_listing(filters, db)
         service_providers_query = service_providers_query.filter(*conditions)
-        service_providers = service_providers_query.offset(offset).limit(page_size).all()
+        service_providers = service_providers_query.offset(offset).limit(filters.page_size).all()
 
         return service_providers
 
     #######################
     ### private methods ###
     #######################
+
+    @staticmethod
+    def _perform_joins_for_listing(filters: ListFilterParams, db: Session):
+        """Performs the joins for the search query.
+
+        Args:
+            filters (ListFilterParams): The filters to apply to the query.
+            query (Query): The query to perform the joins on.
+
+        Returns:
+            Query: The query with the joins performed.
+        """
+
+        query = db.query(models.ServiceProvider)
+
+        # add the review conditions if there are any reviews
+        if db.query(models.Reviews).filter(models.Reviews.service_provider_id == models.ServiceProvider.id).count():
+            query = (
+                query.join(models.Reviews)
+                .having(func.avg(models.Reviews.rating) >= filters.reviews_gt)
+                .having(func.avg(models.Reviews.rating) <= filters.reviews_lt)
+            ).group_by(models.ServiceProvider.id)
+
+        # relationship filters have to work using joins as sqlalchemy doesn't support
+        # filtering on relationships with the in_ operator
+        if filters.skills:
+            query = query.join(models.Skills).filter(models.Skills.skill.in_(filters.skills))
+
+        for lower, upper in list_pairs(filters.availability):
+            the_daterange = DateRange(lower, upper)
+            query = query.join(models.Availability).filter(models.Availability.availability.contained_by(the_daterange))
+
+        return query
+
+    @staticmethod
+    def _generate_conditions_for_listing(filters: ListFilterParams) -> list:
+        conditions = []
+        if filters.name:
+            conditions.append(models.ServiceProvider.name == filters.name)
+        if filters.cost_gt is not None:
+            conditions.append(models.ServiceProvider.cost_in_pence > filters.cost_gt)
+        if filters.cost_lt is not None:
+            conditions.append(models.ServiceProvider.cost_in_pence < filters.cost_lt)
+        return conditions
+
     @staticmethod
     def _insert_service_provider(
         service_provider: models.ServiceProvider, service_provider_schema: schemas.ServiceProviderSchema, db: Session

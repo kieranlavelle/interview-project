@@ -122,6 +122,29 @@ def create_multiple_service_providers_in_db(
 
 
 @pytest.fixture
+def create_multiple_service_provider_reviews_in_db(
+    create_multiple_service_providers_in_db: list[models.ServiceProvider], user_id: UUID, db_connection: Session
+) -> list[models.Reviews]:
+
+    one = ServiceProviderReviewRepository.new(
+        service_provider_id=create_multiple_service_providers_in_db[0].id,
+        review=schemas.NewServiceProviderReview(rating=5),
+        user_id=user_id,
+        db=db_connection,
+    )
+
+    two = ServiceProviderReviewRepository.new(
+        service_provider_id=create_multiple_service_providers_in_db[1].id,
+        review=schemas.NewServiceProviderReview(rating=2),
+        user_id=user_id,
+        db=db_connection,
+    )
+
+    db_connection.commit()
+    return [one, two]
+
+
+@pytest.fixture
 def create_service_provider_reviews_in_db(
     create_service_provider_in_db: models.ServiceProvider,
     service_provider_review: schemas.NewServiceProviderReview,

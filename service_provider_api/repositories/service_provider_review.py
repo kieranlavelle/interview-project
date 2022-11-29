@@ -20,13 +20,13 @@ class FailedToCreateReview(Exception):
 class ServiceProviderReviewRepository:
     @staticmethod
     def new(
-        service_provider_id: UUID, provider: schemas.NewServiceProviderReview, user_id: UUID, db: Session
+        service_provider_id: UUID, review: schemas.NewServiceProviderReview, user_id: UUID, db: Session
     ) -> models.ServiceProvider:
         """Create a new service provider review.
 
         Args:
             service_provider_id (UUID): The ID of the service provider to review.
-            provider (NewServiceProviderReview): The review to create.
+            review (NewServiceProviderReview): The review to create.
             user_id (UUID): The ID of the user creating the review.
             db (Session): The database session.
 
@@ -44,10 +44,11 @@ class ServiceProviderReviewRepository:
             service_provider_review = models.Reviews(
                 service_provider_id=service_provider_id,
                 user_id=user_id,
-                rating=provider.rating,
+                rating=review.rating,
             )
-            with db.begin_nested():
-                db.add(service_provider_review)
+
+            db.add(service_provider_review)
+            db.commit()
             db.refresh(service_provider_review)
             return service_provider_review
 
