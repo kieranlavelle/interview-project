@@ -161,7 +161,7 @@ async def search_service_provider(
 
     # validate the cost ranges
     if cost_gt is not None and cost_lt is not None:
-        if cost_lt >= cost_gt:
+        if cost_lt <= cost_gt:
             return schemas.ErrorResponse(error="cost_lt must be less than cost_gt")
 
     service_providers = ServiceProviderRepository.list(db, page, page_size, name, skills, cost_lt, cost_gt)

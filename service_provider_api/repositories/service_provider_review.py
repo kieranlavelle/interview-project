@@ -46,8 +46,8 @@ class ServiceProviderReviewRepository:
                 user_id=user_id,
                 rating=provider.rating,
             )
-            db.add(service_provider_review)
-            db.commit()
+            with db.begin_nested():
+                db.add(service_provider_review)
             db.refresh(service_provider_review)
             return service_provider_review
 

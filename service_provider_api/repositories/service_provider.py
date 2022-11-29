@@ -84,8 +84,6 @@ class ServiceProviderRepository:
                 db.query(models.ServiceProvider).filter(models.ServiceProvider.id == service_provider_id).first()
             )
 
-        db.close()
-
         if not service_provider:
             raise ServiceProviderNotFound
 
@@ -138,7 +136,7 @@ class ServiceProviderRepository:
                 raise ServiceProviderNotFound()
 
             # this is a put, so we delete everything and then re-insert it in a transaction
-            with db.begin():
+            with db.begin_nested():
                 db.delete(service_provider)
 
                 service_provider = models.ServiceProvider(
@@ -225,5 +223,6 @@ class ServiceProviderRepository:
                     availability=DateRange(availability.from_date, availability.to_date),
                 )
             )
+        db.commit()
 
         return service_provider

@@ -105,7 +105,9 @@ def service_provider_review() -> schemas.NewServiceProviderReview:
 def create_service_provider_in_db(
     service_provider: schemas.NewServiceProviderInSchema, user_id: UUID, db_connection: Session
 ) -> models.ServiceProvider:
-    return ServiceProviderRepository.new(service_provider, user_id, db_connection)
+    providers = ServiceProviderRepository.new(service_provider, user_id, db_connection)
+    db_connection.commit()
+    return providers
 
 
 @pytest.fixture
@@ -116,7 +118,6 @@ def create_multiple_service_providers_in_db(
         ServiceProviderRepository.new(provider, user_id, db_connection) for provider in multiple_service_providers
     ]
     db_connection.commit()
-    db_connection.close()
     return providers
 
 
@@ -128,6 +129,8 @@ def create_service_provider_reviews_in_db(
 ) -> models.Reviews:
 
     review_user_uuid = uuid4()
-    return ServiceProviderReviewRepository.new(
+    service_provider_review_db = ServiceProviderReviewRepository.new(
         create_service_provider_in_db.id, service_provider_review, review_user_uuid, db_connection
     )
+    db_connection.commit()
+    return service_provider_review_db
