@@ -115,13 +115,14 @@ class ServiceProviderRepository:
 
     @staticmethod
     def put(
-        updated_service_provider: schemas.ServiceProviderSchema, user_id: UUID, db: Session
+        updated_service_provider: schemas.ServiceProviderSchema, service_provider_id: UUID, user_id: UUID, db: Session
     ) -> models.ServiceProvider:
         """Updates a service provider in the database.
 
         Args:
             updated_service_provider (ServiceProviderSchema): The updated service provider
-            user_id (UUID): The user id of the user making the request
+            service_provider_id (UUID): The ID of the service provider to update.
+            user_id (UUID): The user id of the user making the request. They must own the service provider.
             db (Session): The database session
 
         Raises:
@@ -130,26 +131,19 @@ class ServiceProviderRepository:
         """
 
         try:
-            db_service_provider = (
-                db.query(models.ServiceProvider)
-                .filter(
-                    models.ServiceProvider.id == updated_service_provider.id,
-                    models.ServiceProvider.user_id == user_id,
-                )
-                .first()
-            )
-            if not db_service_provider:
+            service_provider = ServiceProviderRepository.get(service_provider_id, db, user_id)
+            if not service_provider:
                 raise ServiceProviderNotFound()
 
             # this is a put, so we delete everything and then re-insert it in a transaction
             with db.begin():
-                db.delete(db_service_provider)
-                db_service_provider = ServiceProviderRepository._insert_service_provider(
-                    db_service_provider, updated_service_provider, db
+                db.delete(service_provider)
+                service_provider = ServiceProviderRepository._insert_service_provider(
+                    service_provider, updated_service_provider, db
                 )
 
-            db.refresh(db_service_provider)
-            return db_service_provider
+            db.refresh(service_provider)
+            return service_provider
 
         except exc.SQLAlchemyError as e:
             raise FailedToUpdateServiceProvider from e

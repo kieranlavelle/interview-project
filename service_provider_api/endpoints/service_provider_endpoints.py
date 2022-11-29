@@ -16,7 +16,6 @@ from service_provider_api.repositories.service_provider_review import (
     ServiceProviderReviewRepository,
 )
 from service_provider_api import schemas
-from service_provider_api.schemas import ServiceProviderSchema
 
 router = APIRouter(prefix="/service-provider")
 log = structlog.get_logger()
@@ -25,7 +24,7 @@ log = structlog.get_logger()
 @router.post(
     "",
     responses={
-        HTTPStatus.CREATED: {"model": ServiceProviderSchema},
+        HTTPStatus.CREATED: {"model": schemas.ServiceProviderSchema},
         HTTPStatus.INTERNAL_SERVER_ERROR: {"model": schemas.ErrorResponse},
     },
 )
@@ -39,7 +38,7 @@ async def create_service_provider(
     try:
         new_service_provider = ServiceProviderRepository.new(provider, user_id, db)
         response.status_code = HTTPStatus.CREATED
-        return ServiceProviderSchema(**new_service_provider.as_dict())
+        return schemas.ServiceProviderSchema(**new_service_provider.as_dict())
     except FailedToCreateServiceProvider:
         response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
         return schemas.ErrorResponse(error="There was an error creating the service provider. Please try again later.")
@@ -77,7 +76,10 @@ async def add_service_provider_review(
 
 @router.get(
     "/{service_provider_id}",
-    responses={HTTPStatus.OK: {"model": ServiceProviderSchema}, HTTPStatus.NOT_FOUND: {"model": schemas.ErrorResponse}},
+    responses={
+        HTTPStatus.OK: {"model": schemas.ServiceProviderSchema},
+        HTTPStatus.NOT_FOUND: {"model": schemas.ErrorResponse},
+    },
 )
 async def get_service_provider(
     service_provider_id: UUID,
@@ -87,15 +89,35 @@ async def get_service_provider(
 
     try:
         service_provider = ServiceProviderRepository.get(service_provider_id, db)
-        return ServiceProviderSchema(**service_provider.as_dict())
+        return schemas.ServiceProviderSchema(**service_provider.as_dict())
     except ServiceProviderNotFound:
         response.status_code = HTTPStatus.NOT_FOUND
         return schemas.ErrorResponse(error="Service provider not found")
 
 
-@router.put("/{service_provider_id}")
-async def update_service_provider(service_provider_id: UUID) -> dict:
-    pass
+@router.put(
+    "/{service_provider_id}",
+    responses={
+        HTTPStatus.OK: {"model": schemas.ServiceProviderSchema},
+        HTTPStatus.NOT_FOUND: {"model": schemas.ErrorResponse},
+    },
+)
+async def update_service_provider(
+    service_provider_id: UUID,
+    updated_service_provider: schemas.NewServiceProviderInSchema,
+    response: Response,
+    user_id: UUID = Header(),
+    db: Session = Depends(get_db),
+) -> dict:
+
+    try:
+        service_provider = ServiceProviderRepository.put(updated_service_provider, service_provider_id, user_id, db)
+        return schemas.ServiceProviderSchema(**service_provider.as_dict())
+    except ServiceProviderNotFound:
+        # return 404 if the service provider doesn't exist or the user doesn't own it
+        # we don't want to do UNAUTHORIZED here as we don't want to leak information
+        response.status_code = HTTPStatus.NOT_FOUND
+        return schemas.ErrorResponse(error="Service provider not found")
 
 
 @router.delete(
