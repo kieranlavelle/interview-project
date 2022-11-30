@@ -22,7 +22,7 @@ def test_list_service_providers_name_filter(
     Test that we can get a paginated list of service providers & filters work.
     """
 
-    response = test_client.get("/v1_0/service-providers/list", params={"name": name})
+    response = test_client.get("/v1_0/service-providers", params={"name": name})
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -51,9 +51,7 @@ def test_list_service_providers_skills_filter(
     Test that we can get a paginated list of service providers & filters work.
     """
 
-    response = test_client.get(
-        "/v1_0/service-providers/list", params={"skills": skills}
-    )
+    response = test_client.get("/v1_0/service-providers", params={"skills": skills})
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -90,7 +88,7 @@ def test_list_service_providers_cost_filter(
 
     params = {"cost_lt": cost_lt, "cost_gt": cost_gt}
     params = {k: v for k, v in params.items() if v is not None}
-    response = test_client.get("/v1_0/service-providers/list", params=params)
+    response = test_client.get("/v1_0/service-providers", params=params)
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -126,7 +124,7 @@ def test_list_service_providers_review_filter(
 
     params = {"reviews_lt": reviews_lt, "reviews_gt": reviews_gt}
     params = {k: v for k, v in params.items() if v is not None}
-    response = test_client.get("/v1_0/service-providers/list", params=params)
+    response = test_client.get("/v1_0/service-providers", params=params)
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -166,7 +164,7 @@ def test_list_service_providers_availability_filter(
     """
 
     params = {"availability": availability}
-    response = test_client.get("/v1_0/service-providers/list", params=params)
+    response = test_client.get("/v1_0/service-providers", params=params)
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -247,7 +245,7 @@ def test_pagintation(
 ):
 
     response = test_client.get(
-        "/v1_0/service-providers/list", params={"page": 1, "page_size": 1}
+        "/v1_0/service-providers", params={"page": 1, "page_size": 1}
     )
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -257,7 +255,7 @@ def test_pagintation(
 
     # get the second page
     response = test_client.get(
-        "/v1_0/service-providers/list", params={"page": 2, "page_size": 1}
+        "/v1_0/service-providers", params={"page": 2, "page_size": 1}
     )
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")

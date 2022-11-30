@@ -47,15 +47,44 @@ Black is an opinionated auto-formatting tool. It's used within the project the e
 ### [flake8](https://flake8.pycqa.org/en/latest/)
 Flake8 is a popular python code linting tool. It's used within the project to aid with formatting and to catch common code smells.
 ## Database Archtecture & Technologies.
-- repository & data model
-- why postgres
-- why sqlalchemy
-- 3NF
-- Why not DynamoDB (would require additional services then can't easily be demo'd in the context of a take home test)
+
+### Repository & data-model
+This service was designed with two primary software development patterns in mind. The [Repository Pattern](https://deviq.com/design-patterns/repository-pattern) & the Data Model Pattern. The two `repositories` in the code base (`ServiceProviderRepository`, `ServiceProviderReviewRepository`) aim to abstract away data access into a simple to use & consistent interface.
+
+The data models within the code base aim to provide a consistent view of the properties and attributes available on that model / resource. As an ORM was used in the project [[SQLAlchemy](https://www.sqlalchemy.org/)], the models from this ORM form the data-models for the service.
+
+### Postgres
+[Postgres](https://www.postgresql.org/) is used as the primary persistence store for this service. The reasons for this are outlined below:
+- Has wide support across the industry, perticularly for managed hosting such as `AWS RDP Postgres`.
+- Support's modern typs such as `DateRange` which meshes quite well with the problem statement of the service.
+- Support's complex search which would be ideal if we wanted to expand upon tasks #3 and #4.
+- Widely used in the industry so it's easy to find developers with good work knowledge of it.
+
+### SQL Alchemy
+[SQLAlchemy](https://www.sqlalchemy.org/) is used as an ORM in the service. The motivations are outlined below:
+- Using an ORM abstracts away the SQL as it generates it for you based on the models you've created. This is ideal in most cases as developers can often accidentally write poorly performing SQL.
+- It abstracts away the underlying database system, making it simpler to switch between database's should the need arise.
+- It tightly couples your data-model and your database model, reducing the liklihood of you inserting bad data into your database.
+- It trivialises working with a database model that has been normalized into 3NF, by allowing you to create `one-to-many` relationships on the models.
+
+### Third Normal Form (3NF)
+The database has been designed to be in the third normal form. This form is usually considered strong enough for data base design, especially for a new service where the data access patterns are not 100% clear. The main motivation for doing this in this case is the removal of data redundancy where redundant data is having the same data in multiple places. By removing the data redundancy, it becomes easy to change the data as it is only present in one place. There are many other marginal advantages of 3NF, but they're not the primary motivation for normalisation in this service.
+
+One of the downsides of normalising the data is it makes it harder to select / join together all the attributes of an entity. Our ORM is able to help with this by allowing us to describe how our tables relate to eachother through the use of [relationships](https://docs.sqlalchemy.org/en/14/orm/relationships.html). This then gives it all the infomation it need's to perform these joins for us.
+
+### Pagination
+For the aggregation endpoints in the service (`/v1_0/service-providers`, `/v1_0/service-providers/recommend`) it is possible to paginate the results set as a large amount of results can theoretically be returned. In both cases a consistent pagination interface is enabled though the user of query peramiters on the endpoints. A user can use the query params `page` & `page_size` to paginate the result set.
+
+### Versioning
+
+### FastAPI
+
 ## Deviations from the Spec & Motivations for doing so.
 - response format.
 - service provider ratings
 - added the notion of users, so we can control who can do write/delete operations
+
+## Task 3 - ...
 
 ## Task 4 - How else would you enhance the system.
 - async
@@ -66,3 +95,4 @@ Flake8 is a popular python code linting tool. It's used within the project to ai
 - Add elebic to support db-migrations
 - Store review-count so it doesnt have to be calculated
 - Add comments to the review object
+- filter the skills that can be added / add a skills search to populate a dropdown

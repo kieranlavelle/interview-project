@@ -19,9 +19,7 @@ router = APIRouter(prefix="/service-providers")
 log = structlog.get_logger()
 
 
-@router.get(
-    "/list", responses={HTTPStatus.OK: {"model": schemas.ServiceProviderSchema}}
-)
+@router.get("/", responses={HTTPStatus.OK: {"model": schemas.ServiceProviderSchema}})
 @version(1, 0)
 async def search_service_provider(
     params: ListFilterParams = Depends(),
@@ -38,7 +36,7 @@ async def search_service_provider(
     "/recommend", responses={HTTPStatus.OK: {"model": schemas.ServiceProviderSchema}}
 )
 @version(1, 0)
-async def search_service_provider(
+async def recommend_service_provider(
     params: ServiceProviderRecomendationParams = Depends(),
     db: Session = Depends(get_db),
 ) -> dict:

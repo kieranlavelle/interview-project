@@ -2,7 +2,7 @@
 name = "service_provider_api"
 version = "0.1.0"
 description = ""
-authors = ["kmplavelle@gmail.com"]
+authors = ["Kieran Lavelle <kmplavelle@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
