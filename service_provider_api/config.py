@@ -4,7 +4,11 @@ from pydantic import BaseSettings
 class Settings(BaseSettings):
     """Application settings."""
 
-    DATABASE_URL = "postgresql://postgres:password@localhost:5432/postgres"
+    DATABASE_HOST: str = "localhost"
+
+    @property
+    def DATABASE_URL(self):
+        return f"postgresql://postgres:password@{self.DATABASE_HOST}:5432/postgres"
 
 
 settings = Settings()

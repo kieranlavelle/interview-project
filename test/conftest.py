@@ -1,3 +1,4 @@
+import time
 from datetime import date
 from uuid import uuid4, UUID
 
@@ -25,6 +26,16 @@ def db_connection() -> Session:
     # bind the models to the DB engine
     Base.metadata.create_all(bind=engine)
     db = Session()
+
+    # this allows the db to start before the tests
+    for i in range(100):
+        try:
+            db.connection()
+        except Exception:
+            if i < 10:
+                time.sleep(0.1)
+            raise Exception("Could not connect to database")
+
     yield db
     db.close()
 
