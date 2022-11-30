@@ -3,9 +3,11 @@ from uuid import UUID
 import pytest
 from sqlalchemy.orm import Session
 
-from service_provider_api import models
-from service_provider_api.repositories.service_provider import ServiceProviderRepository
-from service_provider_api import schemas
+from service_provider_api.database import models
+from service_provider_api.core.repositories.service_provider import (
+    ServiceProviderRepository,
+)
+from service_provider_api.api import schemas
 
 
 def test_can_create_service_provider(

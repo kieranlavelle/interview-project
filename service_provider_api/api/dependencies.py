@@ -6,7 +6,7 @@ from pydantic.dataclasses import dataclass
 from pydantic import root_validator, validator
 from sqlalchemy.orm import Session
 
-from service_provider_api.utils.database import SessionLocal
+from service_provider_api.database.database import SessionLocal
 
 
 def get_db() -> Session:

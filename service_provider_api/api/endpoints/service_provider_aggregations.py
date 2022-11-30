@@ -5,15 +5,15 @@ from fastapi import APIRouter, Depends
 from fastapi_versioning import version
 from sqlalchemy.orm import Session
 
-from service_provider_api.dependencies import (
+from service_provider_api.api.dependencies import (
     get_db,
     ListFilterParams,
     ServiceProviderRecomendationParams,
 )
-from service_provider_api.repositories.service_provider import (
+from service_provider_api.core.repositories.service_provider import (
     ServiceProviderRepository,
 )
-from service_provider_api import schemas
+from service_provider_api.api import schemas
 
 router = APIRouter(prefix="/service-providers")
 log = structlog.get_logger()

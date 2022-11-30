@@ -4,7 +4,7 @@ from http import HTTPStatus
 import pytest
 from fastapi.testclient import TestClient
 
-from service_provider_api import models
+from service_provider_api.database import models
 
 
 def test_raises_not_found_for_non_existant_service_provider(

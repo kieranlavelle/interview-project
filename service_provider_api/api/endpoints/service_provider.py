@@ -6,17 +6,17 @@ from fastapi import APIRouter, Depends, Header, Response
 from fastapi_versioning import version
 from sqlalchemy.orm import Session
 
-from service_provider_api.dependencies import get_db
-from service_provider_api.repositories.service_provider import (
+from service_provider_api.api.dependencies import get_db
+from service_provider_api.core.repositories.service_provider import (
     FailedToCreateServiceProvider,
     ServiceProviderRepository,
     ServiceProviderNotFound,
 )
-from service_provider_api.repositories.service_provider_review import (
+from service_provider_api.core.repositories.service_provider_review import (
     FailedToCreateReview,
     ServiceProviderReviewRepository,
 )
-from service_provider_api import schemas
+from service_provider_api.api import schemas
 
 router = APIRouter(prefix="/service-provider")
 router_2 = APIRouter(prefix="/service-providers")

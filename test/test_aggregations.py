@@ -4,7 +4,7 @@ from datetime import date
 import pytest
 from fastapi.testclient import TestClient
 
-from service_provider_api import models
+from service_provider_api.database import models
 
 
 @pytest.mark.parametrize(

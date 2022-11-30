@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, DATERANGE
 from sqlalchemy import Column, Integer, Float, String, ForeignKey
 
-from service_provider_api.utils.database import Base
+from service_provider_api.database.database import Base
 
 
 class ServiceProvider(Base):

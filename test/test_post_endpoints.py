@@ -5,8 +5,8 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi.encoders import jsonable_encoder
 
-from service_provider_api import models
-from service_provider_api import schemas
+from service_provider_api.database import models
+from service_provider_api.api import schemas
 
 
 def test_can_create_service_provider(

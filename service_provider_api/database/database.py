@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 import psycopg2.extras
 
 
-from service_provider_api.config import settings
+from service_provider_api.core.config import settings
 
 
 # need to call this

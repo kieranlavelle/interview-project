@@ -4,9 +4,11 @@ import structlog
 from sqlalchemy.orm import Session
 from sqlalchemy import exc
 
-from service_provider_api import models
-from service_provider_api import schemas
-from service_provider_api.repositories.service_provider import ServiceProviderRepository
+from service_provider_api.database import models
+from service_provider_api.api import schemas
+from service_provider_api.core.repositories.service_provider import (
+    ServiceProviderRepository,
+)
 
 log = structlog.get_logger()
 

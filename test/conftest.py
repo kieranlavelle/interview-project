@@ -5,14 +5,16 @@ import pytest
 from sqlalchemy.orm import Session
 from fastapi.testclient import TestClient
 
-from service_provider_api import models
-from service_provider_api.repositories.service_provider import ServiceProviderRepository
-from service_provider_api.repositories.service_provider_review import (
+from service_provider_api.database import models
+from service_provider_api.core.repositories.service_provider import (
+    ServiceProviderRepository,
+)
+from service_provider_api.core.repositories.service_provider_review import (
     ServiceProviderReviewRepository,
 )
-from service_provider_api.utils.database import Base, engine, SessionLocal
-from service_provider_api import schemas
-from service_provider_api.app import app
+from service_provider_api.database.database import Base, engine, SessionLocal
+from service_provider_api.api import schemas
+from service_provider_api.api.app import app
 
 
 @pytest.fixture

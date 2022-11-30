@@ -1,6 +1,6 @@
 import uvicorn
 
-from service_provider_api.app import app
+from service_provider_api.api.app import app
 
 
 def start() -> None:

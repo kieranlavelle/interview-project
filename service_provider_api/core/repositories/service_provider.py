@@ -1,6 +1,5 @@
 from uuid import uuid4, UUID
 from typing import Optional
-from datetime import date
 
 from psycopg2.extras import DateRange
 from sqlalchemy.orm import Session
@@ -8,13 +7,12 @@ from sqlalchemy import exc
 from sqlalchemy.sql import func
 import structlog
 
-from service_provider_api.dependencies import (
+from service_provider_api.api.dependencies import (
     ListFilterParams,
-    ServiceProviderRecomendationParams,
     list_pairs,
 )
-from service_provider_api import models
-from service_provider_api import schemas
+from service_provider_api.database import models
+from service_provider_api.api import schemas
 
 log = structlog.get_logger()
 

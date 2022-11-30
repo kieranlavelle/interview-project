@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from service_provider_api import models
+from service_provider_api.database import models
 
 
 def test_cant_delete_for_non_existant_service_provider(
