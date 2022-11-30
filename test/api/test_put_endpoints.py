@@ -23,7 +23,7 @@ def test_can_update_service_provider(
 
     payload = jsonable_encoder(service_provider)
     response = test_client.put(
-        f"/service-provider/{create_service_provider_in_db.id}", json=payload, headers={"user-id": str(user_id)}
+        f"/v1_0/service-provider/{create_service_provider_in_db.id}", json=payload, headers={"user-id": str(user_id)}
     )
 
     # check we get the correct status code back
@@ -51,7 +51,7 @@ def test_cant_update_service_provider_we_dont_own(
 
     payload = jsonable_encoder(service_provider)
     response = test_client.put(
-        f"/service-provider/{create_service_provider_in_db.id}",
+        f"/v1_0/service-provider/{create_service_provider_in_db.id}",
         json=payload,
         headers={"user-id": "00000000-0000-0000-0000-000000000000"},
     )
@@ -79,7 +79,7 @@ def test_can_update_availability(
 
     payload = jsonable_encoder(service_provider)
     response = test_client.put(
-        f"/service-provider/{create_service_provider_in_db.id}",
+        f"/v1_0/service-provider/{create_service_provider_in_db.id}",
         json=payload,
         headers={"user-id": str(user_id)},
     )
@@ -114,7 +114,7 @@ def test_can_update_skills(
 
     payload = jsonable_encoder(service_provider)
     response = test_client.put(
-        f"/service-provider/{create_service_provider_in_db.id}",
+        f"/v1_0/service-provider/{create_service_provider_in_db.id}",
         json=payload,
         headers={"user-id": str(user_id)},
     )

@@ -3,9 +3,10 @@ from uuid import UUID
 
 import structlog
 from fastapi import APIRouter, Depends, Header, Response
+from fastapi_versioning import version
 from sqlalchemy.orm import Session
 
-from service_provider_api.dependencies import get_db, ListFilterParams
+from service_provider_api.dependencies import get_db
 from service_provider_api.repositories.service_provider import (
     FailedToCreateServiceProvider,
     ServiceProviderRepository,
@@ -29,6 +30,7 @@ log = structlog.get_logger()
         HTTPStatus.INTERNAL_SERVER_ERROR: {"model": schemas.ErrorResponse},
     },
 )
+@version(1, 0)
 async def create_service_provider(
     provider: schemas.NewServiceProviderInSchema,
     response: Response,
@@ -56,6 +58,7 @@ async def create_service_provider(
         HTTPStatus.INTERNAL_SERVER_ERROR: {"model": schemas.ErrorResponse},
     },
 )
+@version(1, 0)
 async def add_service_provider_review(
     service_provider_id: UUID,
     review: schemas.NewServiceProviderReview,
@@ -82,6 +85,7 @@ async def add_service_provider_review(
         HTTPStatus.NOT_FOUND: {"model": schemas.ErrorResponse},
     },
 )
+@version(1, 0)
 async def get_service_provider(
     service_provider_id: UUID,
     response: Response,
@@ -103,6 +107,7 @@ async def get_service_provider(
         HTTPStatus.NOT_FOUND: {"model": schemas.ErrorResponse},
     },
 )
+@version(1, 0)
 async def update_service_provider(
     service_provider_id: UUID,
     updated_service_provider: schemas.NewServiceProviderInSchema,
@@ -125,6 +130,7 @@ async def update_service_provider(
     "/{service_provider_id}",
     responses={HTTPStatus.OK: {}, HTTPStatus.NOT_FOUND: {"Model": schemas.ErrorResponse}},
 )
+@version(1, 0)
 async def delete_service_provider(
     service_provider_id: UUID,
     response: Response,

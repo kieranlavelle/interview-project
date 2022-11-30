@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi_versioning import VersionedFastAPI, version
 
 from service_provider_api.endpoints import service_provider, service_provider_aggregations
 from service_provider_api.utils.database import Base, engine
@@ -15,5 +16,9 @@ app.include_router(service_provider_aggregations.router)
 
 
 @app.get("/health")
+@version(1, 0)
 async def health() -> dict:
     return {"status": "ok"}
+
+
+app = VersionedFastAPI(app, version_format="{major}.{minor}")

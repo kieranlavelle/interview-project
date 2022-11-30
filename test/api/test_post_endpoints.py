@@ -14,7 +14,7 @@ def test_can_create_service_provider(
 ) -> None:
 
     payload = jsonable_encoder(service_provider)
-    response = test_client.post("/service-provider", json=payload, headers={"user-id": str(user_id)})
+    response = test_client.post("/v1_0/service-provider", json=payload, headers={"user-id": str(user_id)})
 
     # check we get the correct status code back
     if response.status_code != HTTPStatus.CREATED:
@@ -34,7 +34,9 @@ def test_can_create_service_provider_review(
 
     payload = jsonable_encoder(service_provider_review)
     response = test_client.post(
-        f"/service-provider/{create_service_provider_in_db.id}/review", json=payload, headers={"user-id": str(user_id)}
+        f"/v1_0/service-provider/{create_service_provider_in_db.id}/review",
+        json=payload,
+        headers={"user-id": str(user_id)},
     )
 
     # check we get the correct status code back

@@ -22,7 +22,7 @@ def test_list_service_providers_name_filter(
     Test that we can get a paginated list of service providers & filters work.
     """
 
-    response = test_client.get("/service-providers/list", params={"name": name})
+    response = test_client.get("/v1_0/service-providers/list", params={"name": name})
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -51,7 +51,7 @@ def test_list_service_providers_skills_filter(
     Test that we can get a paginated list of service providers & filters work.
     """
 
-    response = test_client.get("/service-providers/list", params={"skills": skills})
+    response = test_client.get("/v1_0/service-providers/list", params={"skills": skills})
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -88,7 +88,7 @@ def test_list_service_providers_cost_filter(
 
     params = {"cost_lt": cost_lt, "cost_gt": cost_gt}
     params = {k: v for k, v in params.items() if v is not None}
-    response = test_client.get("/service-providers/list", params=params)
+    response = test_client.get("/v1_0/service-providers/list", params=params)
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -124,7 +124,7 @@ def test_list_service_providers_review_filter(
 
     params = {"reviews_lt": reviews_lt, "reviews_gt": reviews_gt}
     params = {k: v for k, v in params.items() if v is not None}
-    response = test_client.get("/service-providers/list", params=params)
+    response = test_client.get("/v1_0/service-providers/list", params=params)
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -158,7 +158,7 @@ def test_list_service_providers_availability_filter(
     """
 
     params = {"availability": availability}
-    response = test_client.get("/service-providers/list", params=params)
+    response = test_client.get("/v1_0/service-providers/list", params=params)
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -219,7 +219,7 @@ def test_can_get_recommended_service_providers(
         "availability": availability,
         "minimum_review_rating": min_rating,
     }
-    response = test_client.get("/service-providers/recommend", params=params)
+    response = test_client.get("/v1_0/service-providers/recommend", params=params)
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -238,7 +238,7 @@ def test_pagintation(
     create_multiple_service_provider_reviews_in_db: models.Reviews,
 ):
 
-    response = test_client.get("/service-providers/list", params={"page": 1, "page_size": 1})
+    response = test_client.get("/v1_0/service-providers/list", params={"page": 1, "page_size": 1})
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
     json_response = response.json()
@@ -246,7 +246,7 @@ def test_pagintation(
         pytest.fail("Did not get the expected number of service providers")
 
     # get the second page
-    response = test_client.get("/service-providers/list", params={"page": 2, "page_size": 1})
+    response = test_client.get("/v1_0/service-providers/list", params={"page": 2, "page_size": 1})
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
     json_response = response.json()

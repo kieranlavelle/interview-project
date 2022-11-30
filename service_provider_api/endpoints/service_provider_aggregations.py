@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 import structlog
 from fastapi import APIRouter, Depends
+from fastapi_versioning import version
 from sqlalchemy.orm import Session
 
 from service_provider_api.dependencies import get_db, ListFilterParams, ServiceProviderRecomendationParams
@@ -15,6 +16,7 @@ log = structlog.get_logger()
 
 
 @router.get("/list", responses={HTTPStatus.OK: {"model": schemas.ServiceProviderSchema}})
+@version(1, 0)
 async def search_service_provider(
     params: ListFilterParams = Depends(),
     db: Session = Depends(get_db),
@@ -25,6 +27,7 @@ async def search_service_provider(
 
 
 @router.get("/recommend", responses={HTTPStatus.OK: {"model": schemas.ServiceProviderSchema}})
+@version(1, 0)
 async def search_service_provider(
     params: ServiceProviderRecomendationParams = Depends(),
     db: Session = Depends(get_db),
