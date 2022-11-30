@@ -1,6 +1,11 @@
 
 
-unit-test:
+setup:
+	@echo "Setting up the project..."
+	@echo "Installing dependencies..."
+	poetry install
+
+unit-test: setup
 	docker compose up db -d
 	sleep 5
 	poetry run pytest
