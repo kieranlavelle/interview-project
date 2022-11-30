@@ -29,6 +29,18 @@ The unit / API tests are built using pytest. In the instances where a database i
 ### Why are the unit test's ran against an actual database?
 In some cases, depending on the database used, there are good mocking libraries available to mock your database connection / queries. An example would be the `moto` library for mocking `DynamoDB` tables. However, for a `Postgres` database the available libraries are not mature engough, nor of sufficent quality to justify using them in the unit-tests. This leaves us with two options, either patch the methods that perform data access or run a local database. As I wanted to be able to properly test are data access methods, I chose to run a local verson of `Postgres`.
 
+### Why do the unit-tests work through an API Test Client?
+Upon inspection of the unit test's it becomes clear that an endpoint is considered a `unit` in the context of this service. When a new service/api is created I've found this a convenient way to achive broad code coverage without spending excessive time creating a unit test for each public function within the code base. My criteria for deciding if a function should have a unit test is;
+1. Is this a complex function that is not sufficient covered by the current api-tests?
+1. Has there been a bug found in this function?
+If the answer to either of this is yes, then I create a unit test to cover that function, and/or the bug relating to that function.
+
+## Dev tooling used
+- precommit
+- Pytest
+- Black
+- flake8
+
 ## Database Archtecture & Technologies.
 - repository & data model
 - why postgres
