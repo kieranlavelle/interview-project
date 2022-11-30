@@ -233,5 +233,22 @@ def test_can_get_recommended_service_providers(
         pytest.fail("Service provider name is not correct")
 
 
-def test_pagintation():
-    raise NotImplementedError()
+def test_pagintation(
+    test_client: TestClient,
+    create_multiple_service_provider_reviews_in_db: models.Reviews,
+):
+
+    response = test_client.get("/service-providers/list", params={"page": 1, "page_size": 1})
+    if response.status_code != HTTPStatus.OK:
+        pytest.fail("API returned a status code other than 200")
+    json_response = response.json()
+    if len(json_response["service_providers"]) != 1:
+        pytest.fail("Did not get the expected number of service providers")
+
+    # get the second page
+    response = test_client.get("/service-providers/list", params={"page": 2, "page_size": 1})
+    if response.status_code != HTTPStatus.OK:
+        pytest.fail("API returned a status code other than 200")
+    json_response = response.json()
+    if len(json_response["service_providers"]) != 1:
+        pytest.fail("Did not get the expected number of service providers for the second page.")

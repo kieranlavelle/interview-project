@@ -140,20 +140,19 @@ class ServiceProviderRepository:
                 raise ServiceProviderNotFound()
 
             # this is a put, so we delete everything and then re-insert it in a transaction
-            with db.begin_nested():
-                db.delete(service_provider)
+            db.delete(service_provider)
 
-                service_provider = models.ServiceProvider(
-                    id=service_provider_id,
-                    user_id=user_id,
-                    name=updated_service_provider.name,
-                    cost_in_pence=updated_service_provider.cost_in_pence,
-                )
+            service_provider = models.ServiceProvider(
+                id=service_provider_id,
+                user_id=user_id,
+                name=updated_service_provider.name,
+                cost_in_pence=updated_service_provider.cost_in_pence,
+            )
 
-                service_provider = ServiceProviderRepository._insert_service_provider(
-                    service_provider, updated_service_provider, db
-                )
-
+            service_provider = ServiceProviderRepository._insert_service_provider(
+                service_provider, updated_service_provider, db
+            )
+            db.commit()
             db.refresh(service_provider)
             return service_provider
 
@@ -215,15 +214,19 @@ class ServiceProviderRepository:
             Query: The query with the joins performed.
         """
 
-        query = db.query(models.ServiceProvider)
+        query = db.query(models.ServiceProvider).order_by(models.ServiceProvider.cost_in_pence)
 
         # add the review conditions if there are any reviews
         if db.query(models.Reviews).filter(models.Reviews.service_provider_id == models.ServiceProvider.id).count():
             query = (
-                query.join(models.Reviews)
-                .having(func.avg(models.Reviews.rating) >= filters.reviews_gt)
-                .having(func.avg(models.Reviews.rating) <= filters.reviews_lt)
-            ).group_by(models.ServiceProvider.id)
+                (
+                    query.join(models.Reviews)
+                    .having(func.avg(models.Reviews.rating) >= filters.reviews_gt)
+                    .having(func.avg(models.Reviews.rating) <= filters.reviews_lt)
+                )
+                .group_by(models.ServiceProvider.id)
+                .order_by(func.avg(models.Reviews.rating))
+            )
 
         # relationship filters have to work using joins as sqlalchemy doesn't support
         # filtering on relationships with the in_ operator
@@ -266,6 +269,5 @@ class ServiceProviderRepository:
                     availability=DateRange(availability.from_date, availability.to_date),
                 )
             )
-        db.commit()
 
         return service_provider

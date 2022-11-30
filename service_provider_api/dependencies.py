@@ -1,17 +1,16 @@
 from typing import Optional
 from datetime import date
-import itertools
 
 from fastapi import Query
 from pydantic.dataclasses import dataclass
-from pydantic import Field, root_validator, validator
+from pydantic import root_validator, validator
 
-from service_provider_api.utils.database import SessionLocal
+from service_provider_api.utils.database import Session
 
 
 # Dependency
 def get_db():
-    db = SessionLocal()
+    db = Session()
     try:
         yield db
     finally:

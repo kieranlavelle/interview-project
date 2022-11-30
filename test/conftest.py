@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from service_provider_api import models
 from service_provider_api.repositories.service_provider import ServiceProviderRepository
 from service_provider_api.repositories.service_provider_review import ServiceProviderReviewRepository
-from service_provider_api.utils.database import Base, engine, SessionLocal
+from service_provider_api.utils.database import Base, engine, Session
 from service_provider_api import schemas
 
 
@@ -24,7 +24,7 @@ def clean_database(db_connection: Session):
 def db_connection() -> Session:
     # bind the models to the DB engine
     Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
+    db = Session()
     yield db
     db.close()
 
