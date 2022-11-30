@@ -124,9 +124,37 @@ The spec document gives a view centric example of what a service provider might 
 When designing the API I did not want to make `review_rating` an attribute of a service provider that could be edited. I decided to create a seperate entity `Rating` which can be created over the API. The `review_rating` for a given service provider is the average of all of the `review_rating`'s for that service provider, if there are no ratings, their rathing is 0.
 
 ### Users
-- added the notion of users, so we can control who can do write/delete operations
+I chose to add the notion of a user into the API. This is exposed through the header `user_id`, which is a `UUID` that several of the endpoints require. The motivation for adding this was that for some of the endpoints *_specifically, the post, put & delete ones_*, we want to make sure that the user taking the action, is that same user that owns the resource they're trying to modify. This feature was also useful for adding reviews, as we want to know which user's left a review.
 
-## Task 3 - ...
+## Task 3
+Task 3 is exposed through the endpoint `GET: /v1_0/service-providers/recommend`. This endpoint returns a paginatable list of service providers ordered from most appropriate to least appropriate. There are multiple service providers returned when multiple of them match the conditions provided over the API.
+
+Here is an example of the query params available to help with the following explanation:
+```python
+@dataclass
+class ServiceProviderRecomendationParams:
+    page: int = Query(default=1, ge=1)
+    page_size: int = Query(default=10, ge=1)
+    expected_job_duration_in_days: int = Query(default=1, ge=1)
+    job_budget_in_pence: int = Query(ge=1)
+    skills: list[str] = Query()
+    availability: list[date] = Query()
+    minimum_review_rating: Optional[float] = Query(default=0, le=5, ge=0)
+```
+
+The most appropriate service provider is determined using the following process:
+1. Identify the user's `max_cost_per_day`: `job_budget_in_pence / expected_job_duration_in_days`
+2. Filter the service providers with:
+    1. `service_provider.cost_per_day <= max_cost_per_day`.
+    2. At least one of the service providers skills matches the skills requested by the user.
+    3. The service provider is available over the date range the user requested.
+    4. If the user specified it, the service provider's rating must be >= `minimum_review_rating`
+    5. Order the remaining list of service providers by `cost` DESC & `review_rating` DESC.
+
+### Potential improvements to Task 3 - Given more time.
+1. We could also rank `service_providers` by how many of their skills matched what the user requests. We could also rule `service_providers` out if they didn't have every skill a user requested, although the user might then miss out on relevant searches.
+2. We could also rank `service_providers` by how many reviews they had instead of just the average value of all of their reviews, as a `review_rating` of `5.0` with `1` review is arguably not as good as a `4.5` with `20,000` reviews.
+3. Add additional validation to the endpoint to make sure that the `expected_job_duration_in_days` parameter is consistent with the `availability` parameter. I.e if the user provides the date range `date(2022, 1, 1) -> date(2022, 1, 2)` but sets `expected_job_duration_in_days` to `50`, then that is invalid.
 
 ## Task 4 - How else would you enhance the system.
 - async
@@ -139,4 +167,4 @@ When designing the API I did not want to make `review_rating` an attribute of a 
 - Add comments to the review object
 - filter the skills that can be added / add a skills search to populate a dropdown
 - sentry
-- review ratings could be per skill and have a date added field
+- review ratings could be per skill and have a date added field, user cant review own work....
