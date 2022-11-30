@@ -76,12 +76,54 @@ One of the downsides of normalising the data is it makes it harder to select / j
 For the aggregation endpoints in the service (`/v1_0/service-providers`, `/v1_0/service-providers/recommend`) it is possible to paginate the results set as a large amount of results can theoretically be returned. In both cases a consistent pagination interface is enabled though the user of query peramiters on the endpoints. A user can use the query params `page` & `page_size` to paginate the result set.
 
 ### Versioning
+The API is versioned using [fastapi-versioning](https://github.com/DeanWay/fastapi-versioning). The motivation around this was to make it trivial to produce a new version of an endpoint. All we'd need to do is duplicate the old version of the endpoint, alter the code in the endpoint handler and increment the `@version(1, 0)` decorator. The increment would depend on the change. The specific library was chosen as it works seemlessly with FastAPI.
 
-### FastAPI
+### Logging & Structlog
+[Structlog](https://www.structlog.org/en/stable/) was chosen as the logging package of choice for the service as it's a stable, mature logging library & standard that can grow with the service. It's also possible for us to build middleware into the FastAPI application that will add thing's like `user-id` into the logging context so we can see the user who perfomed the action associated with each log event.
 
 ## Deviations from the Spec & Motivations for doing so.
-- response format.
-- service provider ratings
+*At certain points in the code base I have deviated from the specification outlined in the document for the take home technical test. Below, I'll highlight the changes and justify them.*
+### Alteration of the response format.
+The spec document gives a view centric example of what a service provider might look like. This is `#view 1` in the json snippet below. While there would be nothing wrong with creating an endpoint with a specific view in mind, or anything wrong with this exact payload, I considered it a better option to create a response format that could be easily consumed by other API's or a front-end. This way, the display format of the data is the consumers responsibility instead of the APIs.
+
+`#view 2` Show's the response format I settled on for the `ServiceProviderSchema`, which forms the basis of most of the responses over the API. The major changes are:
+1. `Cost` has became `cost_in_pence` and is now an integer value. Formatting this value has became the responsibility of the front end.
+2. `Reviews Rating` has became `review_rating`, which is now a floating point number.
+3. `Availability` has not really changed. It's format has just been clarified.
+
+
+`#view 1`
+```json
+{
+    "Name": "SEO Incorporated",
+    "Skills": ["SEO Optimisation", "Digital Marketing", "Cold Calling"],
+    "Cost": "£250/day",
+    "Availability": ["date range 1", "date range 2", "date range3"],
+    "Reviews Rating": "3.5/5.0"
+}
+```
+
+`#view 2`
+```json
+{
+    "name": "SEO Incorporated",
+    "skills": ["SEO Optimisation", "Digital Marketing", "Cold Calling"],
+    "cost_in_pence": 25000,
+    "availability": [
+        {
+            "from_date": "2022-11-12",
+            "to_date": "2022-12-28"
+        },
+        ...
+    ],
+    "review_rating": 3.5
+}
+```
+
+### Service Provider Ratings
+When designing the API I did not want to make `review_rating` an attribute of a service provider that could be edited. I decided to create a seperate entity `Rating` which can be created over the API. The `review_rating` for a given service provider is the average of all of the `review_rating`'s for that service provider, if there are no ratings, their rathing is 0.
+
+### Users
 - added the notion of users, so we can control who can do write/delete operations
 
 ## Task 3 - ...
@@ -96,3 +138,5 @@ For the aggregation endpoints in the service (`/v1_0/service-providers`, `/v1_0/
 - Store review-count so it doesnt have to be calculated
 - Add comments to the review object
 - filter the skills that can be added / add a skills search to populate a dropdown
+- sentry
+- review ratings could be per skill and have a date added field
