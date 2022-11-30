@@ -23,7 +23,9 @@ def test_can_update_service_provider(
 
     payload = jsonable_encoder(service_provider)
     response = test_client.put(
-        f"/v1_0/service-provider/{create_service_provider_in_db.id}", json=payload, headers={"user-id": str(user_id)}
+        f"/v1_0/service-provider/{create_service_provider_in_db.id}",
+        json=payload,
+        headers={"user-id": str(user_id)},
     )
 
     # check we get the correct status code back

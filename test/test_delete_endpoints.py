@@ -8,7 +8,9 @@ from sqlalchemy.orm import Session
 from service_provider_api import models
 
 
-def test_cant_delete_for_non_existant_service_provider(test_client: TestClient, user_id: UUID) -> None:
+def test_cant_delete_for_non_existant_service_provider(
+    test_client: TestClient, user_id: UUID
+) -> None:
     response = test_client.delete(
         "/v1_0/service-provider/00000000-0000-0000-0000-000000000000",
         headers={"user-id": str(user_id)},
@@ -29,7 +31,9 @@ def test_user_cant_delete_service_provider_they_dont_own(
 
 
 def test_delete_service_provider(
-    test_client: TestClient, user_id: UUID, create_service_provider_reviews_in_db: models.Reviews
+    test_client: TestClient,
+    user_id: UUID,
+    create_service_provider_reviews_in_db: models.Reviews,
 ) -> None:
     """Test that the API returns a service provider with reviews calculated"""
 
@@ -56,7 +60,10 @@ def test_deleting_service_provider_cascades(
     # check the service prover is in the database
     service_provider = (
         db_connection.query(models.ServiceProvider)
-        .filter(models.ServiceProvider.id == create_service_provider_reviews_in_db.service_provider_id)
+        .filter(
+            models.ServiceProvider.id
+            == create_service_provider_reviews_in_db.service_provider_id
+        )
         .one()
     )
     if not service_provider:

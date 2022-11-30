@@ -51,7 +51,9 @@ def test_list_service_providers_skills_filter(
     Test that we can get a paginated list of service providers & filters work.
     """
 
-    response = test_client.get("/v1_0/service-providers/list", params={"skills": skills})
+    response = test_client.get(
+        "/v1_0/service-providers/list", params={"skills": skills}
+    )
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -141,9 +143,15 @@ def test_list_service_providers_review_filter(
 @pytest.mark.parametrize(
     "availability,expected_providers",
     [
-        ([date(2020, 1, 1).isoformat(), date(2021, 12, 28).isoformat()], {"John Smith"}),
+        (
+            [date(2020, 1, 1).isoformat(), date(2021, 12, 28).isoformat()],
+            {"John Smith"},
+        ),
         ([date(2022, 1, 1).isoformat(), date(2023, 1, 1).isoformat()], {"Dean Greene"}),
-        ([date(2020, 1, 1).isoformat(), date(2023, 1, 1).isoformat()], {"John Smith", "Dean Greene"}),
+        (
+            [date(2020, 1, 1).isoformat(), date(2023, 1, 1).isoformat()],
+            {"John Smith", "Dean Greene"},
+        ),
     ],
 )
 def test_list_service_providers_availability_filter(
@@ -238,7 +246,9 @@ def test_pagintation(
     create_multiple_service_provider_reviews_in_db: models.Reviews,
 ):
 
-    response = test_client.get("/v1_0/service-providers/list", params={"page": 1, "page_size": 1})
+    response = test_client.get(
+        "/v1_0/service-providers/list", params={"page": 1, "page_size": 1}
+    )
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
     json_response = response.json()
@@ -246,9 +256,13 @@ def test_pagintation(
         pytest.fail("Did not get the expected number of service providers")
 
     # get the second page
-    response = test_client.get("/v1_0/service-providers/list", params={"page": 2, "page_size": 1})
+    response = test_client.get(
+        "/v1_0/service-providers/list", params={"page": 2, "page_size": 1}
+    )
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
     json_response = response.json()
     if len(json_response["service_providers"]) != 1:
-        pytest.fail("Did not get the expected number of service providers for the second page.")
+        pytest.fail(
+            "Did not get the expected number of service providers for the second page."
+        )

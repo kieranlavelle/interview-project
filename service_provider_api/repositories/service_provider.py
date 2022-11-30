@@ -8,7 +8,11 @@ from sqlalchemy import exc
 from sqlalchemy.sql import func
 import structlog
 
-from service_provider_api.dependencies import ListFilterParams, ServiceProviderRecomendationParams, list_pairs
+from service_provider_api.dependencies import (
+    ListFilterParams,
+    ServiceProviderRecomendationParams,
+    list_pairs,
+)
 from service_provider_api import models
 from service_provider_api import schemas
 
@@ -33,7 +37,9 @@ class FailedToDeleteServiceProvider(Exception):
 
 class ServiceProviderRepository:
     @staticmethod
-    def new(provider: schemas.NewServiceProviderInSchema, user_id: UUID, db: Session) -> models.ServiceProvider:
+    def new(
+        provider: schemas.NewServiceProviderInSchema, user_id: UUID, db: Session
+    ) -> models.ServiceProvider:
         """Creates a new service provider in the database.
 
         Args:
@@ -55,7 +61,9 @@ class ServiceProviderRepository:
             )
 
             with db.begin_nested():
-                session_provider = ServiceProviderRepository._insert_service_provider(service_provider, provider, db)
+                session_provider = ServiceProviderRepository._insert_service_provider(
+                    service_provider, provider, db
+                )
 
             db.refresh(session_provider)
             return session_provider
@@ -63,7 +71,9 @@ class ServiceProviderRepository:
             raise FailedToCreateServiceProvider from e
 
     @staticmethod
-    def get(service_provider_id: UUID, db: Session, user_id: Optional[UUID] = None) -> models.ServiceProvider:
+    def get(
+        service_provider_id: UUID, db: Session, user_id: Optional[UUID] = None
+    ) -> models.ServiceProvider:
         """Gets a service provider from the database.
 
         Args:
@@ -80,12 +90,17 @@ class ServiceProviderRepository:
             # if the user_id has been provided.
             service_provider = (
                 db.query(models.ServiceProvider)
-                .filter(models.ServiceProvider.id == service_provider_id, models.ServiceProvider.user_id == user_id)
+                .filter(
+                    models.ServiceProvider.id == service_provider_id,
+                    models.ServiceProvider.user_id == user_id,
+                )
                 .first()
             )
         else:
             service_provider = (
-                db.query(models.ServiceProvider).filter(models.ServiceProvider.id == service_provider_id).first()
+                db.query(models.ServiceProvider)
+                .filter(models.ServiceProvider.id == service_provider_id)
+                .first()
             )
 
         if not service_provider:
@@ -106,7 +121,9 @@ class ServiceProviderRepository:
             FailedToDeleteServiceProvider: If the service provider could not be deleted."""
 
         try:
-            service_provider = ServiceProviderRepository.get(service_provider_id, db, user_id)
+            service_provider = ServiceProviderRepository.get(
+                service_provider_id, db, user_id
+            )
             if not service_provider:
                 # the service provider does not exist, or the user does not own it
                 raise ServiceProviderNotFound
@@ -119,7 +136,10 @@ class ServiceProviderRepository:
 
     @staticmethod
     def put(
-        updated_service_provider: schemas.ServiceProviderSchema, service_provider_id: UUID, user_id: UUID, db: Session
+        updated_service_provider: schemas.ServiceProviderSchema,
+        service_provider_id: UUID,
+        user_id: UUID,
+        db: Session,
     ) -> models.ServiceProvider:
         """Updates a service provider in the database.
 
@@ -135,7 +155,9 @@ class ServiceProviderRepository:
         """
 
         try:
-            service_provider = ServiceProviderRepository.get(service_provider_id, db, user_id)
+            service_provider = ServiceProviderRepository.get(
+                service_provider_id, db, user_id
+            )
             if not service_provider:
                 raise ServiceProviderNotFound()
 
@@ -174,13 +196,19 @@ class ServiceProviderRepository:
             list[models.ServiceProvider]: A list of service providers.
         """
 
-        offset = ServiceProviderRepository._calculate_offset(filters.page, filters.page_size)
+        offset = ServiceProviderRepository._calculate_offset(
+            filters.page, filters.page_size
+        )
 
         # create all of the conditions for the query
         conditions = ServiceProviderRepository._generate_conditions_for_listing(filters)
-        service_providers_query = ServiceProviderRepository._perform_joins_for_listing(filters, db)
+        service_providers_query = ServiceProviderRepository._perform_joins_for_listing(
+            filters, db
+        )
         service_providers_query = service_providers_query.filter(*conditions)
-        service_providers = service_providers_query.offset(offset).limit(filters.page_size).all()
+        service_providers = (
+            service_providers_query.offset(offset).limit(filters.page_size).all()
+        )
 
         return service_providers
 
@@ -214,10 +242,16 @@ class ServiceProviderRepository:
             Query: The query with the joins performed.
         """
 
-        query = db.query(models.ServiceProvider).order_by(models.ServiceProvider.cost_in_pence)
+        query = db.query(models.ServiceProvider).order_by(
+            models.ServiceProvider.cost_in_pence
+        )
 
         # add the review conditions if there are any reviews
-        if db.query(models.Reviews).filter(models.Reviews.service_provider_id == models.ServiceProvider.id).count():
+        if (
+            db.query(models.Reviews)
+            .filter(models.Reviews.service_provider_id == models.ServiceProvider.id)
+            .count()
+        ):
             query = (
                 (
                     query.join(models.Reviews)
@@ -231,11 +265,15 @@ class ServiceProviderRepository:
         # relationship filters have to work using joins as sqlalchemy doesn't support
         # filtering on relationships with the in_ operator
         if filters.skills:
-            query = query.join(models.Skills).filter(models.Skills.skill.in_(filters.skills))
+            query = query.join(models.Skills).filter(
+                models.Skills.skill.in_(filters.skills)
+            )
 
         for lower, upper in list_pairs(filters.availability):
             the_daterange = DateRange(lower, upper)
-            query = query.join(models.Availability).filter(models.Availability.availability.contained_by(the_daterange))
+            query = query.join(models.Availability).filter(
+                models.Availability.availability.contained_by(the_daterange)
+            )
 
         return query
 
@@ -252,7 +290,9 @@ class ServiceProviderRepository:
 
     @staticmethod
     def _insert_service_provider(
-        service_provider: models.ServiceProvider, service_provider_schema: schemas.ServiceProviderSchema, db: Session
+        service_provider: models.ServiceProvider,
+        service_provider_schema: schemas.ServiceProviderSchema,
+        db: Session,
     ) -> models.ServiceProvider:
 
         db.add(service_provider)
@@ -266,7 +306,9 @@ class ServiceProviderRepository:
             db.add(
                 models.Availability(
                     service_provider_id=service_provider.id,
-                    availability=DateRange(availability.from_date, availability.to_date),
+                    availability=DateRange(
+                        availability.from_date, availability.to_date
+                    ),
                 )
             )
 

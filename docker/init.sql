@@ -11,7 +11,7 @@ CREATE TABLE "reviews" (
   "rating" float NOT NULL,
   "user_id" uuid NOT NULL,
    CONSTRAINT fk_service_provider
-      FOREIGN KEY(service_provider_id) 
+      FOREIGN KEY(service_provider_id)
 	  REFERENCES service_providers(id)
 );
 
@@ -20,7 +20,7 @@ CREATE TABLE "skills" (
   "service_provider_id" uuid NOT NULL,
   "skill" text NOT NULL,
    CONSTRAINT fk_service_provider
-      FOREIGN KEY(service_provider_id) 
+      FOREIGN KEY(service_provider_id)
 	  REFERENCES service_providers(id)
 );
 
@@ -29,6 +29,6 @@ CREATE TABLE "availability" (
   "service_provider_id" uuid NOT NULL,
   "availability" daterange NOT NULL,
    CONSTRAINT fk_service_provider
-      FOREIGN KEY(service_provider_id) 
+      FOREIGN KEY(service_provider_id)
 	  REFERENCES service_providers(id)
 );

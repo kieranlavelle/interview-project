@@ -4,6 +4,7 @@ setup:
 	@echo "Setting up the project..."
 	@echo "Installing dependencies..."
 	poetry install
+	pre-commit install
 
 unit-test: setup
 	docker compose up db -d

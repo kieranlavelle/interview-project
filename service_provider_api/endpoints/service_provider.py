@@ -44,11 +44,15 @@ async def create_service_provider(
         return schemas.ServiceProviderSchema(**new_service_provider.as_dict())
     except FailedToCreateServiceProvider:
         response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-        return schemas.ErrorResponse(error="There was an error creating the service provider. Please try again later.")
+        return schemas.ErrorResponse(
+            error="There was an error creating the service provider. Please try again later."
+        )
     except Exception as e:
         log.error("Unexpected error creating service provider", error=e)
         response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-        return schemas.ErrorResponse(error="There was an error creating the service provider")
+        return schemas.ErrorResponse(
+            error="There was an error creating the service provider"
+        )
 
 
 @router.post(
@@ -68,7 +72,9 @@ async def add_service_provider_review(
 ) -> dict:
 
     try:
-        new_review = ServiceProviderReviewRepository.new(service_provider_id, review, user_id, db)
+        new_review = ServiceProviderReviewRepository.new(
+            service_provider_id, review, user_id, db
+        )
         response.status_code = HTTPStatus.CREATED
         return schemas.ServiceProviderReview.from_orm(new_review)
     except FailedToCreateReview:
@@ -117,7 +123,9 @@ async def update_service_provider(
 ) -> dict:
 
     try:
-        service_provider = ServiceProviderRepository.put(updated_service_provider, service_provider_id, user_id, db)
+        service_provider = ServiceProviderRepository.put(
+            updated_service_provider, service_provider_id, user_id, db
+        )
         return schemas.ServiceProviderSchema(**service_provider.as_dict())
     except ServiceProviderNotFound:
         # return 404 if the service provider doesn't exist or the user doesn't own it
@@ -128,7 +136,10 @@ async def update_service_provider(
 
 @router.delete(
     "/{service_provider_id}",
-    responses={HTTPStatus.OK: {}, HTTPStatus.NOT_FOUND: {"Model": schemas.ErrorResponse}},
+    responses={
+        HTTPStatus.OK: {},
+        HTTPStatus.NOT_FOUND: {"Model": schemas.ErrorResponse},
+    },
 )
 @version(1, 0)
 async def delete_service_provider(

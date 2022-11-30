@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi_versioning import VersionedFastAPI, version
 
-from service_provider_api.endpoints import service_provider, service_provider_aggregations
+from service_provider_api.endpoints import (
+    service_provider,
+    service_provider_aggregations,
+)
 from service_provider_api.utils.database import Base, engine
 from service_provider_api.log_setup import setup_logging
 

@@ -9,17 +9,23 @@ from service_provider_api import schemas
 
 
 def test_can_create_service_provider(
-    service_provider: schemas.NewServiceProviderInSchema, user_id: UUID, db_connection: Session
+    service_provider: schemas.NewServiceProviderInSchema,
+    user_id: UUID,
+    db_connection: Session,
 ) -> None:
 
     # setup
-    new_service_provider = ServiceProviderRepository.new(service_provider, user_id, db_connection)
+    new_service_provider = ServiceProviderRepository.new(
+        service_provider, user_id, db_connection
+    )
 
     # check we get the correct type back
     assert isinstance(new_service_provider, models.ServiceProvider)
 
     # check that the returned service provider is in the database
-    db_service_provider = ServiceProviderRepository.get(new_service_provider.id, db_connection)
+    db_service_provider = ServiceProviderRepository.get(
+        new_service_provider.id, db_connection
+    )
     if not isinstance(db_service_provider, models.ServiceProvider):
         pytest.fail("Service provider not found in database")
 

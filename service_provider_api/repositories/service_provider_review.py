@@ -20,7 +20,10 @@ class FailedToCreateReview(Exception):
 class ServiceProviderReviewRepository:
     @staticmethod
     def new(
-        service_provider_id: UUID, review: schemas.NewServiceProviderReview, user_id: UUID, db: Session
+        service_provider_id: UUID,
+        review: schemas.NewServiceProviderReview,
+        user_id: UUID,
+        db: Session,
     ) -> models.ServiceProvider:
         """Create a new service provider review.
 
@@ -54,4 +57,6 @@ class ServiceProviderReviewRepository:
 
         except exc.SQLAlchemyError as e:
             log.error("Failed to create service provider review", error=e)
-            raise FailedToCreateReview("An error occurred creating the service provider review") from e
+            raise FailedToCreateReview(
+                "An error occurred creating the service provider review"
+            ) from e

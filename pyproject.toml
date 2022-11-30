@@ -2,7 +2,7 @@
 name = "service_provider_api"
 version = "0.1.0"
 description = ""
-authors = ["Kieran Lavelle"]
+authors = ["kmplavelle@gmail.com"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -19,9 +19,8 @@ fastapi-versioning = "^0.10.0"
 black = "^22.10.0"
 pytest = "^7.2.0"
 httpx = "^0.23.1"
-
-[tool.black]
-line-length = 120
+pre-commit = "^2.20.0"
+flake8 = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

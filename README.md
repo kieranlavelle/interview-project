@@ -15,7 +15,7 @@ Docker is used to containerse the application in order to make it easily deploya
 ## Running the project
 Once the dependencies specified in the *Requirements* section of the `README.md` have been installed you can begin working on & deploying the application. In order to aid with this, a number of commands have been provided in the `Makefile`. An explanation of those commands can be found below.
 
-- `make setup`: Installs the `poetry` dependencies for the project.
+- `make setup`: Installs the `poetry` dependencies for the project & set's up `pre-commit`.
 - `make unit-test`: Installs project dependencies, creates & seed's a local db, and then run's unit tests locally.
 - `make db-up`: Build's and run's a local instance of the database.
 - `make db-down`: Removes any local running instances of the database.
@@ -36,21 +36,33 @@ Upon inspection of the unit test's it becomes clear that an endpoint is consider
 If the answer to either of this is yes, then I create a unit test to cover that function, and/or the bug relating to that function.
 
 ## Dev tooling used
-- precommit
-- Pytest
-- Black
-- flake8
+### [pre-commit](https://pre-commit.com/)
+pre-commit is used to ensure each commit to our repo has a small number of hook's ran before the commit. This can often help reduce the number of small issues found at PR time.
+### [Pytest](https://docs.pytest.org/en/7.2.x/contents.html)
+Pytest was used for unit testing within the project. It was chosen for it's modern and innovative features such as `fixtures` & peramiterized unit tests which are heavily leveraged within the code base.
 
+### [Black](https://github.com/psf/black)
+Black is an opinionated auto-formatting tool. It's used within the project the ensure all code is formatted in the same manner without the developer having to think about it.
+
+### [flake8](https://flake8.pycqa.org/en/latest/)
+Flake8 is a popular python code linting tool. It's used within the project to aid with formatting and to catch common code smells.
 ## Database Archtecture & Technologies.
 - repository & data model
 - why postgres
 - why sqlalchemy
 - 3NF
-- Why not DynamoDB
+- Why not DynamoDB (would require additional services then can't easily be demo'd in the context of a take home test)
 ## Deviations from the Spec & Motivations for doing so.
 - response format.
 - service provider ratings
+- added the notion of users, so we can control who can do write/delete operations
 
-## Improvements
+## Task 4 - How else would you enhance the system.
 - async
 - Turned into a lambda API / application so we could sclae endpoints.
+- DynamoDB depending on the scale needed
+- Split reviews out into a seperate micro-service
+- Add end-to-end trace-ids???
+- Add elebic to support db-migrations
+- Store review-count so it doesnt have to be calculated
+- Add comments to the review object

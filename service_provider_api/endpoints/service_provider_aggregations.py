@@ -5,7 +5,11 @@ from fastapi import APIRouter, Depends
 from fastapi_versioning import version
 from sqlalchemy.orm import Session
 
-from service_provider_api.dependencies import get_db, ListFilterParams, ServiceProviderRecomendationParams
+from service_provider_api.dependencies import (
+    get_db,
+    ListFilterParams,
+    ServiceProviderRecomendationParams,
+)
 from service_provider_api.repositories.service_provider import (
     ServiceProviderRepository,
 )
@@ -15,7 +19,9 @@ router = APIRouter(prefix="/service-providers")
 log = structlog.get_logger()
 
 
-@router.get("/list", responses={HTTPStatus.OK: {"model": schemas.ServiceProviderSchema}})
+@router.get(
+    "/list", responses={HTTPStatus.OK: {"model": schemas.ServiceProviderSchema}}
+)
 @version(1, 0)
 async def search_service_provider(
     params: ListFilterParams = Depends(),
@@ -23,10 +29,14 @@ async def search_service_provider(
 ) -> dict:
     log.info("Searching for service providers", params=params)
     service_providers = ServiceProviderRepository.list(db, params)
-    return schemas.ServiceProvidersList(service_providers=[s.as_dict() for s in service_providers])
+    return schemas.ServiceProvidersList(
+        service_providers=[s.as_dict() for s in service_providers]
+    )
 
 
-@router.get("/recommend", responses={HTTPStatus.OK: {"model": schemas.ServiceProviderSchema}})
+@router.get(
+    "/recommend", responses={HTTPStatus.OK: {"model": schemas.ServiceProviderSchema}}
+)
 @version(1, 0)
 async def search_service_provider(
     params: ServiceProviderRecomendationParams = Depends(),
@@ -45,4 +55,6 @@ async def search_service_provider(
     )
 
     service_providers = ServiceProviderRepository.list(db, filters)
-    return schemas.ServiceProvidersList(service_providers=[s.as_dict() for s in service_providers])
+    return schemas.ServiceProvidersList(
+        service_providers=[s.as_dict() for s in service_providers]
+    )

@@ -4,13 +4,19 @@ from datetime import date
 from fastapi import Query
 from pydantic.dataclasses import dataclass
 from pydantic import root_validator, validator
+from sqlalchemy.orm import Session
 
-from service_provider_api.utils.database import Session
+from service_provider_api.utils.database import SessionLocal
 
 
-# Dependency
-def get_db():
-    db = Session()
+def get_db() -> Session:
+    """Dependency used to inject a database session into a route.
+
+    Returns:
+        Session: A database session.
+    """
+
+    db = SessionLocal()
     try:
         yield db
     finally:

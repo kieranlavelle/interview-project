@@ -10,11 +10,15 @@ from service_provider_api import schemas
 
 
 def test_can_create_service_provider(
-    test_client: TestClient, service_provider: schemas.NewServiceProviderInSchema, user_id: UUID
+    test_client: TestClient,
+    service_provider: schemas.NewServiceProviderInSchema,
+    user_id: UUID,
 ) -> None:
 
     payload = jsonable_encoder(service_provider)
-    response = test_client.post("/v1_0/service-provider", json=payload, headers={"user-id": str(user_id)})
+    response = test_client.post(
+        "/v1_0/service-provider", json=payload, headers={"user-id": str(user_id)}
+    )
 
     # check we get the correct status code back
     if response.status_code != HTTPStatus.CREATED:
