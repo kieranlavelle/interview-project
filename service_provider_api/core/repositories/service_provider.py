@@ -1,37 +1,54 @@
-from uuid import uuid4, UUID
+"""Module to hold the service provider repo,
+and all of the classes and methods relevant to it.."""
+
 from typing import Optional
+from uuid import UUID, uuid4
 
-from psycopg2.extras import DateRange
-from sqlalchemy.orm import Session
-from sqlalchemy import exc
-from sqlalchemy.sql import func
 import structlog
+from psycopg2.extras import DateRange
+from sqlalchemy import exc
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
 
-from service_provider_api.api.dependencies import ListFilterParams
-from service_provider_api.database import models
 from service_provider_api.api import schemas
+from service_provider_api.api.dependencies import ListFilterParams
 from service_provider_api.core.utils import list_pairs
+from service_provider_api.database import models
 
 log = structlog.get_logger()
 
 
 class FailedToCreateServiceProvider(Exception):
+    """Raised when a service provider cannot be created."""
+
     pass
 
 
 class FailedToUpdateServiceProvider(Exception):
+    """Raised when a service provider cannot be updated."""
+
     pass
 
 
 class ServiceProviderNotFound(Exception):
+    """Raised when a service provider cannot be found."""
+
     pass
 
 
 class FailedToDeleteServiceProvider(Exception):
+    """Raised when a service provider cannot be deleted."""
+
     pass
 
 
 class ServiceProviderRepository:
+    """Repository for service providers.
+
+    This class aims to provide an easy to user interface which abstracts
+    database operations for service providers.
+    """
+
     @staticmethod
     def new(
         provider: schemas.NewServiceProviderInSchema, user_id: UUID, db: Session
@@ -42,6 +59,9 @@ class ServiceProviderRepository:
             provider (NewServiceProviderInSchema): The service provider to create.
             user_id (UUID): The user id of the user creating the service provider.
             db (Session): The database connection.
+
+        Returns:
+            ServiceProvider: The newly created service provider.
 
         Raises:
             FailedToCreateServiceProvider: If the service provider could not be created.
@@ -56,12 +76,14 @@ class ServiceProviderRepository:
                 cost_in_pence=provider.cost_in_pence,
             )
 
-            with db.begin_nested():
-                session_provider = ServiceProviderRepository._insert_service_provider(
-                    service_provider, provider, db
-                )
+            session_provider = ServiceProviderRepository._insert_service_provider(
+                service_provider, provider, db
+            )
 
+            # save our changes to the db
+            db.commit()
             db.refresh(session_provider)
+
             return session_provider
         except exc.SQLAlchemyError as e:
             raise FailedToCreateServiceProvider from e
@@ -77,13 +99,17 @@ class ServiceProviderRepository:
             db (Session): The database connection.
             user_id (Optional[UUID], optional): The user id of the user getting the service provider. Defaults to None.
 
+        Returns:
+            ServiceProvider: The service provider identified by the ID.
+
         Raises:
             ServiceProviderNotFound: If the service provider could not be found.
         """
 
         if user_id:
             # we want to make sure the calling user owns this service provider resource
-            # if the user_id has been provided.
+            # if the user_id has been provided. This check is mainly used for a get
+            # before an update or delete.
             service_provider = (
                 db.query(models.ServiceProvider)
                 .filter(
@@ -113,6 +139,9 @@ class ServiceProviderRepository:
             user_id (UUID): The ID of the user who owns the service provider.
             db (Session): The database session.
 
+        Returns:
+            None
+
         Raises:
             FailedToDeleteServiceProvider: If the service provider could not be deleted."""
 
@@ -124,6 +153,7 @@ class ServiceProviderRepository:
                 # the service provider does not exist, or the user does not own it
                 raise ServiceProviderNotFound
 
+            # save our changes to the db
             db.delete(service_provider)
             db.commit()
 
@@ -145,10 +175,16 @@ class ServiceProviderRepository:
             user_id (UUID): The user id of the user making the request. They must own the service provider.
             db (Session): The database session
 
+        Returns:
+            ServiceProvider (models.ServiceProvider): The updated service provider.
+
         Raises:
             ServiceProviderNotFound: If the service provider is not found in the database
             FailedToUpdateServiceProvider: If the service provider fails to update
         """
+
+        # for this, sql-alchemy will automatically handle using transactions
+        # which is needed as this is a multi-step operation
 
         try:
             service_provider = ServiceProviderRepository.get(
@@ -190,6 +226,9 @@ class ServiceProviderRepository:
 
         Returns:
             list[models.ServiceProvider]: A list of service providers.
+
+        Raises:
+            exc.SQLAlchemyError: If the query fails.
         """
 
         offset = ServiceProviderRepository._calculate_offset(

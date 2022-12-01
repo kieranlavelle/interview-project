@@ -1,14 +1,17 @@
+"""Module to hold the service provider review repo,
+and all of the classes and methods relevant to it.."""
+
 from uuid import UUID
 
 import structlog
-from sqlalchemy.orm import Session
 from sqlalchemy import exc
+from sqlalchemy.orm import Session
 
-from service_provider_api.database import models
 from service_provider_api.api import schemas
 from service_provider_api.core.repositories.service_provider import (
     ServiceProviderRepository,
 )
+from service_provider_api.database import models
 
 log = structlog.get_logger()
 
@@ -20,6 +23,12 @@ class FailedToCreateReview(Exception):
 
 
 class ServiceProviderReviewRepository:
+    """Repository for service provider reviews.
+
+    This class aims to provide an easy to user interface which abstracts
+    database operations for service provider reviews.
+    """
+
     @staticmethod
     def new(
         service_provider_id: UUID,
@@ -35,6 +44,9 @@ class ServiceProviderReviewRepository:
             user_id (UUID): The ID of the user creating the review.
             db (Session): The database session.
 
+        Returns:
+            ServiceProvider: The service provider with the new review.
+
         Raises:
             FailedToCreateReview: If the review could not be created.
         """
@@ -44,6 +56,9 @@ class ServiceProviderReviewRepository:
             service_provider = ServiceProviderRepository.get(service_provider_id, db)
             if not service_provider:
                 raise FailedToCreateReview("Service provider not found")
+            log.info(
+                "service provider found", service_provider=service_provider.as_dict()
+            )
 
             # create the service provider review
             service_provider_review = models.Reviews(
@@ -52,6 +67,7 @@ class ServiceProviderReviewRepository:
                 rating=review.rating,
             )
 
+            # add the review to the database
             db.add(service_provider_review)
             db.commit()
             db.refresh(service_provider_review)

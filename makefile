@@ -8,7 +8,9 @@ setup:
 
 unit-test: setup
 	docker compose up db -d
-	sleep 5
+	@echo "Giving the database 10 seconds to start..."
+	sleep 10
+	@echo "Running unit tests..."
 	poetry run pytest
 	docker compose down
 	docker compose down --volumes
