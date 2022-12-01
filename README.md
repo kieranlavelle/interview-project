@@ -44,48 +44,51 @@ If the answer to either of these is yes, then I create a unit test to cover that
 
 ## Dev tooling used
 ### [pre-commit](https://pre-commit.com/)
-pre-commit is used to ensure each commit to our repo has a small number of hook's ran before the commit. This can often help reduce the number of small issues found at PR time.
+pre-commit is used to ensure each commit to our repo has a small number of hooks run before the commit. This can often help reduce the number of small issues found at PR time.
+
 ### [Pytest](https://docs.pytest.org/en/7.2.x/contents.html)
-Pytest was used for unit testing within the project. It was chosen for it's modern and innovative features such as `fixtures` & peramiterized unit tests which are heavily leveraged within the code base.
+Pytest was used for unit testing within the project. It was chosen for its modern and innovative features such as `fixtures` & parameterized unit tests which are heavily leveraged within the code base.
 
 ### [Black](https://github.com/psf/black)
 Black is an opinionated auto-formatting tool. It's used within the project the ensure all code is formatted in the same manner without the developer having to think about it.
 
 ### [flake8](https://flake8.pycqa.org/en/latest/)
 Flake8 is a popular python code linting tool. It's used within the project to aid with formatting and to catch common code smells.
-## Database Archtecture & Technologies.
+
+## Database Architecture & Technologies.
 
 ### Repository & data-model
 This service was designed with two primary software development patterns in mind. The [Repository Pattern](https://deviq.com/design-patterns/repository-pattern) & the Data Model Pattern. The two `repositories` in the code base (`ServiceProviderRepository`, `ServiceProviderReviewRepository`) aim to abstract away data access into a simple to use & consistent interface.
 
-The data models within the code base aim to provide a consistent view of the properties and attributes available on that model / resource. As an ORM was used in the project [[SQLAlchemy](https://www.sqlalchemy.org/)], the models from this ORM form the data-models for the service.
+The data models within the code base aim to provide a consistent view of the properties and attributes available on that model/resource. As an ORM was used in the project [[SQLAlchemy](https://www.sqlalchemy.org/)], the models from this ORM form the data models for the service.
 
 ### Postgres
 [Postgres](https://www.postgresql.org/) is used as the primary persistence store for this service. The reasons for this are outlined below:
-- Has wide support across the industry, perticularly for managed hosting such as `AWS RDP Postgres`.
-- Support's modern typs such as `DateRange` which meshes quite well with the problem statement of the service.
+- Has wide support across the industry, particularly when it comes to managed hosting such as `AWS RDP Postgres`.
+- Support's modern types such as `DateRange` which meshes quite well with the problem statement of the service.
 - Support's complex search which would be ideal if we wanted to expand upon tasks #3 and #4.
 - Widely used in the industry so it's easy to find developers with good work knowledge of it.
 
 ### SQL Alchemy
 [SQLAlchemy](https://www.sqlalchemy.org/) is used as an ORM in the service. The motivations are outlined below:
-- Using an ORM abstracts away the SQL as it generates it for you based on the models you've created. This is ideal in most cases as developers can often accidentally write poorly performing SQL.
-- It abstracts away the underlying database system, making it simpler to switch between database's should the need arise.
-- It tightly couples your data-model and your database model, reducing the liklihood of you inserting bad data into your database.
+- Using an ORM abstract’s away the SQL, as it generates it for you based on the models you've created. This is ideal in most cases as developers can often accidentally write poorly performing SQL.
+- It abstracts away the underlying database system, making it simpler to switch between databases should the need arise.
+- It tightly couples your data model and your database model, reducing the likelihood of you inserting bad data into your database.
 - It trivialises working with a database model that has been normalized into 3NF, by allowing you to create `one-to-many` relationships on the models.
 
 ### Third Normal Form (3NF)
-The database has been designed to be in the third normal form. This form is usually considered strong enough for data base design, especially for a new service where the data access patterns are not 100% clear. The main motivation for doing this in this case is the removal of data redundancy where redundant data is having the same data in multiple places. By removing the data redundancy, it becomes easy to change the data as it is only present in one place. There are many other marginal advantages of 3NF, but they're not the primary motivation for normalisation in this service.
+The database has been designed to be in the third normal form. This form is usually considered strong enough for database design, especially for a new service where the data access patterns are not 100% clear. The main motivation for doing this, in this case, is the removal of data redundancy where redundant data is having the same data in multiple places. By removing the data redundancy, it becomes easy to change the data as it is only present in one place. There are many other marginal advantages of 3NF, but they're not the primary motivation for the normalisation in this service.
 
-One of the downsides of normalising the data is it makes it harder to select / join together all the attributes of an entity. Our ORM is able to help with this by allowing us to describe how our tables relate to eachother through the use of [relationships](https://docs.sqlalchemy.org/en/14/orm/relationships.html). This then gives it all the infomation it need's to perform these joins for us.
+One of the downsides of normalising the data is it makes it harder to select/join together all the attributes of an entity. Our ORM is able to help with this by allowing us to describe how our tables relate to each other through the use of [relationships](https://docs.sqlalchemy.org/en/14/orm/relationships.html). This then gives it all the information it needs to perform these joins for us.
 
-### Pagination
+
+## Pagination
 For the aggregation endpoints in the service (`/v1_0/service-providers`, `/v1_0/service-providers/recommend`) it is possible to paginate the results set as a large amount of results can theoretically be returned. In both cases a consistent pagination interface is enabled though the user of query peramiters on the endpoints. A user can use the query params `page` & `page_size` to paginate the result set.
 
-### Versioning
+## Versioning
 The API is versioned using [fastapi-versioning](https://github.com/DeanWay/fastapi-versioning). The motivation around this was to make it trivial to produce a new version of an endpoint. All we'd need to do is duplicate the old version of the endpoint, alter the code in the endpoint handler and increment the `@version(1, 0)` decorator. The increment would depend on the change. The specific library was chosen as it works seemlessly with FastAPI.
 
-### Logging & Structlog
+## Logging & Structlog
 [Structlog](https://www.structlog.org/en/stable/) was chosen as the logging package of choice for the service as it's a stable, mature logging library & standard that can grow with the service. It's also possible for us to build middleware into the FastAPI application that will add thing's like `user-id` into the logging context so we can see the user who perfomed the action associated with each log event.
 
 ## Deviations from the Spec & Motivations for doing so.
