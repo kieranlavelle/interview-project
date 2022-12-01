@@ -171,10 +171,28 @@ As part of `#Task 3`, I changed the way reviews work. There are further modifica
 ### Async
 Out of the box `FastAPI` has good support for sync & async code and endpoint handlers. Even when the endpoint handler's are defined synchronously `def endpoind_handler(...)`, FastAPI can simultanesoly serve multiple requests by using a thread pool. Handler's should only be defined as async, when the code inside them is non-blocking. `SQLAlchemy` supports non-blocking async database connections (document's can be found [here](https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html)) so it's possible to make our API asynchronus. The primary advantage of this would be allowing the service to have better utilisation of resources as it can do other work (serve other requests more efficiently) while it is waiting for I/O bound tasks such as reading from the database. This would make our API feel more responsive, and would allow us to serve more users as requests would execute faster.
 
+### Alembic
+[Alembic](https://alembic.sqlalchemy.org/en/latest/) is a data migration tool that helps to capture every schema change as a migration script and ensures that the database accurately reflects the data models. These data migration scripts can be automatically generated. Adding `Alembic` to the service would reduce the amount of work the developer need's to do in order to maintain a traditional RDBMS and reduce the liklihood of errors. The tool is easy to get started with and would be an easy win.
+
+### Scaling
+Depending on how the service grow's over time, there are some additional steps we could take to help it scale.
+
+### Scaling the database
+ Database's such as Postgres are capable of growing to massive scales. However, they're typically hard to scale which becomes more of a problem when you consider the shift-left-infrastructure movement where developers are taking on more and more dev-ops work. Given this, if the service needed to be massively scaled we might want to consider something like AWS DynamoDB. Dynamo has been built to be easy to scale, and generally doesn't leave any room for design patterns that don't scale well. It's also incredebly easy to manage. These points would make it a good option for moving to a more easily scalable database.
+
+ One of the downside's of DynamoDB is you can typically only make full use of it when you're confident about what your services data-access patterns will look like, as you need to design the table according to them. Another downside is that it doesn't support the complex searching / filtering that we've been able to do in Postgres. In order to meet that need for the service, we'd likely also need to include `AWS CloudSearch` on top of our `AWS DynamoDB Table`.
+
+### Scaling the API.
+While the API is scalable out of the box, through the use of something like `AWS ECS`, we could potentially make it even more scalable by migrating to a `lambda-per-endpoint` model with the use of `AWS Lambda` & `AWS API Gateway`. This would essentially allow the API to scale infintely to the demand on the service at any given time, and could make the service more resilliant to bug's that effect multiple endpoints. It comes with increased development overhead, but it can be mitigated against by using appropriate tooling.
+
+
+### Logging & Service Monitoring
+One potential point of imporvement would be to add [Sentry](https://sentry.io/) into the application. This would notify us when unhandled exceptions have been raised in the service, allow us to view all the details surrounding these exceptions and then triage the issue in order to solve it.
+
+It would also be useful to create several dashboards with key health information about the service using a tool such as [Grafana](https://grafana.com/)
+
+In order to get better information from our logging, we could also bind a `trace-id` to our logging context. This would allow us to trace a request, and get all of the relevant logs for a given request in a single query. In my experence, this has dramatically reduced the amount of time it's taken me to solve bugs in the past.
+
 ### Other improvements
-- Turned into a lambda API / application so we could sclae endpoints.
-- DynamoDB depending on the scale needed
-- Add end-to-end trace-ids???
-- Add elebic to support db-migrations
+- terraform
 - filter the skills that can be added / add a skills search to populate a dropdown
-- sentry
