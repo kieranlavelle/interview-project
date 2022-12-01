@@ -2,13 +2,13 @@
 
 ## Requirements
 *In order to run the project there are a couple of pre-requisits. These are listed and explained below.*
-#### [Poetry](http://google.com)
-*installation guide: [here](http://google.com)*
+#### [Poetry](https://python-poetry.org/)
+*installation guide: [here](https://python-poetry.org/docs/)*
 
 Poetry is the dependency management tool which I chose to use for the project. In order to work with the project locally poetry must be installed.
 
-#### [Docker](http://google.com)
-*installation guide: [here](http:google.com)*
+#### [Docker](https://www.docker.com/)
+*installation guide: [here](https://docs.docker.com/get-docker/)*
 
 Docker is used to containerse the application in order to make it easily deployable/runnable anywhere. In order to build the project, and the databases it depends on, Docker must be installed.
 
