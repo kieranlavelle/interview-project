@@ -193,6 +193,7 @@ It would also be useful to create several dashboards with key health information
 
 In order to get better information from our logging, we could also bind a `trace-id` to our logging context. This would allow us to trace a request, and get all of the relevant logs for a given request in a single query. In my experence, this has dramatically reduced the amount of time it's taken me to solve bugs in the past.
 
-### Other improvements
-- terraform
-- filter the skills that can be added / add a skills search to populate a dropdown
+### Infrastructure As Code & CI/CD
+By adding some infrastructure as code tooling such as `Terraform`, `Serverless` or `CloudFormation` we could dramatically reduce the time & complexity of managing our infrastructure.
+
+By adding a rhobust CI/CD Pipeline we would reduce the management overhead of deploying new versions of the service to our servers / cloud provider. Ideally, the CI/CD pipeline would also act as a secondary quality control gate (After PR/MR), that could ensure all unit test's pass, all code is linted and any other additional quality steps we wanted to take.
