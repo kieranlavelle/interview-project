@@ -137,7 +137,7 @@ When designing the API I did not want to make `review_rating` an attribute of a 
 I chose to add the notion of a user into the API. This is exposed through the header `user_id`, which is a `UUID` that several of the endpoints require. The motivation for adding this was that for some of the endpoints *_specifically, the post, put & delete ones_*, we want to make sure that the user taking the action, is the same user that owns the resource they're trying to modify. This feature was also useful for adding reviews, as we want to know which user's left a review.
 
 ## Task 3
-Task 3 is exposed through the endpoint `GET: /v1_0/service-providers/recommend`. This endpoint returns a paginatable list of service providers ordered from most appropriate to least appropriate. There are multiple service providers returned when multiple of them match the conditions provided over the API.
+Task 3 is exposed through the endpoint `POST: /v1_0/service-providers/recommend`. This endpoint returns a paginatable list of service providers ordered from most appropriate to least appropriate. There are multiple service providers returned when multiple of them match the conditions provided over the API. The endpoint is implemented as a POST instead of a GET due to the complex filtering requirements and them being complex to handle as query parameters.
 
 Here is an example of the query params available to help with the following explanation:
 ```python
