@@ -81,25 +81,25 @@ The database has been designed to be in the third normal form. This form is usua
 
 One of the downsides of normalising the data is it makes it harder to select/join together all the attributes of an entity. Our ORM is able to help with this by allowing us to describe how our tables relate to each other through the use of [relationships](https://docs.sqlalchemy.org/en/14/orm/relationships.html). This then gives it all the information it needs to perform these joins for us.
 
-
 ## Pagination
-For the aggregation endpoints in the service (`/v1_0/service-providers`, `/v1_0/service-providers/recommend`) it is possible to paginate the results set as a large amount of results can theoretically be returned. In both cases a consistent pagination interface is enabled though the user of query peramiters on the endpoints. A user can use the query params `page` & `page_size` to paginate the result set.
+For the aggregation endpoints in the service (`/v1_0/service-providers`, `/v1_0/service-providers/recommend`) it is possible to paginate the results set as a large number of results can theoretically be returned. In both cases, a consistent pagination interface is enabled through the use of query parameters on the endpoints. A user can use the query params `page` & `page_size` to paginate the result set.
 
 ## Versioning
-The API is versioned using [fastapi-versioning](https://github.com/DeanWay/fastapi-versioning). The motivation around this was to make it trivial to produce a new version of an endpoint. All we'd need to do is duplicate the old version of the endpoint, alter the code in the endpoint handler and increment the `@version(1, 0)` decorator. The increment would depend on the change. The specific library was chosen as it works seemlessly with FastAPI.
+The API is versioned using [fastapi-versioning](https://github.com/DeanWay/fastapi-versioning). The motivation around this was to make it trivial to produce a new version of an endpoint. All we'd need to do is duplicate the old version of the endpoint, alter the code in the endpoint handler and increment the `@version(1, 0)` decorator. The increment would depend on the change. The specific library was chosen as it works seamlessly with FastAPI.
 
 ## Logging & Structlog
-[Structlog](https://www.structlog.org/en/stable/) was chosen as the logging package of choice for the service as it's a stable, mature logging library & standard that can grow with the service. It's also possible for us to build middleware into the FastAPI application that will add thing's like `user-id` into the logging context so we can see the user who perfomed the action associated with each log event.
+[Structlog](https://www.structlog.org/en/stable/) was chosen as the logging package of choice for the service as it's a stable, mature logging library & standard that can grow with the service. It's also possible for us to build middleware into the FastAPI application that will add thing's like `user-id` into the logging context so we can see the user who performed the action associated with each log event.
 
 ## Deviations from the Spec & Motivations for doing so.
-*At certain points in the code base I have deviated from the specification outlined in the document for the take home technical test. Below, I'll highlight the changes and justify them.*
+*At certain points in the code base, I have deviated from the specification outlined in the document for the take-home technical test. Below, I'll highlight the changes and justify them.*
+
 ### Alteration of the response format.
-The spec document gives a view centric example of what a service provider might look like. This is `#view 1` in the json snippet below. While there would be nothing wrong with creating an endpoint with a specific view in mind, or anything wrong with this exact payload, I considered it a better option to create a response format that could be easily consumed by other API's or a front-end. This way, the display format of the data is the consumers responsibility instead of the APIs.
+The spec document gives a view-centric example of what a service provider might look like. This is `#view 1` in the JSON snippet below. While there would be nothing wrong with creating an endpoint with a specific view in mind, or anything wrong with this exact payload, I considered it a better option to create a response format that could be easily consumed by other APIs or a front-end. This way, the display format of the data is the consumer's responsibility instead of the APIs.
 
 `#view 2` Show's the response format I settled on for the `ServiceProviderSchema`, which forms the basis of most of the responses over the API. The major changes are:
-1. `Cost` has became `cost_in_pence` and is now an integer value. Formatting this value has became the responsibility of the front end.
-2. `Reviews Rating` has became `review_rating`, which is now a floating point number.
-3. `Availability` has not really changed. It's format has just been clarified.
+1. `Cost` has become `cost_in_pence` and is now an integer value. Formatting this value has become the responsibility of the front end.
+2. `Reviews Rating` has become `review_rating`, which is now a floating point number.
+3. `Availability` has not really changed. Its format has just been clarified.
 
 
 `#view 1`
@@ -131,10 +131,10 @@ The spec document gives a view centric example of what a service provider might 
 ```
 
 ### Service Provider Ratings
-When designing the API I did not want to make `review_rating` an attribute of a service provider that could be edited. I decided to create a seperate entity `Rating` which can be created over the API. The `review_rating` for a given service provider is the average of all of the `review_rating`'s for that service provider, if there are no ratings, their rathing is 0.
+When designing the API I did not want to make `review_rating` an attribute of a service provider that could be edited. I decided to create a separate entity `Rating` which can be created over the API. The `review_rating` for a given service provider is the average of all of the `review_rating`'s for that service provider, if there are no ratings, their rating is 0.
 
 ### Users
-I chose to add the notion of a user into the API. This is exposed through the header `user_id`, which is a `UUID` that several of the endpoints require. The motivation for adding this was that for some of the endpoints *_specifically, the post, put & delete ones_*, we want to make sure that the user taking the action, is that same user that owns the resource they're trying to modify. This feature was also useful for adding reviews, as we want to know which user's left a review.
+I chose to add the notion of a user into the API. This is exposed through the header `user_id`, which is a `UUID` that several of the endpoints require. The motivation for adding this was that for some of the endpoints *_specifically, the post, put & delete ones_*, we want to make sure that the user taking the action, is the same user that owns the resource they're trying to modify. This feature was also useful for adding reviews, as we want to know which user's left a review.
 
 ## Task 3
 Task 3 is exposed through the endpoint `GET: /v1_0/service-providers/recommend`. This endpoint returns a paginatable list of service providers ordered from most appropriate to least appropriate. There are multiple service providers returned when multiple of them match the conditions provided over the API.
@@ -156,7 +156,7 @@ The most appropriate service provider is determined using the following process:
 1. Identify the user's `max_cost_per_day`: `job_budget_in_pence / expected_job_duration_in_days`
 2. Filter the service providers with:
     1. `service_provider.cost_per_day <= max_cost_per_day`.
-    2. At least one of the service providers skills matches the skills requested by the user.
+    2. At least one of the service providers' skills matches the skills requested by the user.
     3. The service provider is available over the date range the user requested.
     4. If the user specified it, the service provider's rating must be >= `minimum_review_rating`
     5. Order the remaining list of service providers by `cost` DESC & `review_rating` DESC.
@@ -166,44 +166,44 @@ The most appropriate service provider is determined using the following process:
 2. We could also rank `service_providers` by how many reviews they had instead of just the average value of all of their reviews, as a `review_rating` of `5.0` with `1` review is arguably not as good as a `4.5` with `20,000` reviews.
 3. Add additional validation to the endpoint to make sure that the `expected_job_duration_in_days` parameter is consistent with the `availability` parameter. I.e if the user provides the date range `date(2022, 1, 1) -> date(2022, 1, 2)` but sets `expected_job_duration_in_days` to `50`, then that is invalid.
 
-## Task 4 - How else would you enhance the system.
+## Task 4 - How else would you enhance the system?
 
 ### Improvements to Reviews
 As part of `#Task 3`, I changed the way reviews work. There are further modifications that could be made to reviews to improve them.
-1. As there is more complexity surrounding review's when compared to the other sub-resources of a service provider, it might be good to de-couple the resource from the service provider by creating a new micro-service. This would have several advantages such as:
+1. As there is more complexity surrounding reviews when compared to the other sub-resources of a service provider, it might be good to de-couple the resource from the service provider by creating a new micro-service. This would have several advantages such as:
     1. Decreasing the complexity of the `service-provider-api`, making it easier to maintain.
-    1. Increasing the resiliancy of the services overall, as if the `reviews-service` breaks, the `service-provider-api` can still continue to function (although some features will temporarly break, such as displaying reviews.)
+    1. Increasing the resilience of the services overall, as if the `reviews-service` breaks, the `service-provider-api` can still continue to function (although some features will temporarily break, such as displaying reviews.)
 1. Reviews could support adding comments, the change itself would be trivial, but you'd likely want to implement some sort of content moderation to ensure the reviews on the comments are appropriate.
 1. User's should not be able to review their own content. This would be trivial in the current code base as we could simply do a check that `service_provider.user_id != review_user.user_id`.
-1. Review's could be added on a per-skill basis. This would allow us to give more accurate recommendations to our users.
+1. Reviews could be added on a per-skill basis. This would allow us to give more accurate recommendations to our users.
 1. Store an eventually consistent estimate of a `service_providers` average skill. This would make queires for fetching service providers faster.
 
+
 ### Async
-Out of the box `FastAPI` has good support for sync & async code and endpoint handlers. Even when the endpoint handler's are defined synchronously `def endpoind_handler(...)`, FastAPI can simultanesoly serve multiple requests by using a thread pool. Handler's should only be defined as async, when the code inside them is non-blocking. `SQLAlchemy` supports non-blocking async database connections (document's can be found [here](https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html)) so it's possible to make our API asynchronus. The primary advantage of this would be allowing the service to have better utilisation of resources as it can do other work (serve other requests more efficiently) while it is waiting for I/O bound tasks such as reading from the database. This would make our API feel more responsive, and would allow us to serve more users as requests would execute faster.
+Out of the box, `FastAPI` has good support for sync & async code and endpoint handlers. Even when the endpoint handlers are defined synchronously `def endpoind_handler(...)`, FastAPI can simultaneously serve multiple requests by using a thread pool. Handlers should only be defined as async when the code inside them is non-blocking. `SQLAlchemy` supports non-blocking async database connections (the document's can be found [here](https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html)) so it's possible to make our API asynchronous. The primary advantage of this would be allowing the service to have better utilisation of resources as it can do other work (serve other requests more efficiently) while it is waiting for I/O-bound tasks such as reading from the database. This would make our API feel more responsive and would allow us to serve more users as requests would execute faster.
 
 ### Alembic
-[Alembic](https://alembic.sqlalchemy.org/en/latest/) is a data migration tool that helps to capture every schema change as a migration script and ensures that the database accurately reflects the data models. These data migration scripts can be automatically generated. Adding `Alembic` to the service would reduce the amount of work the developer need's to do in order to maintain a traditional RDBMS and reduce the liklihood of errors. The tool is easy to get started with and would be an easy win.
+[Alembic](https://alembic.sqlalchemy.org/en/latest/) is a data migration tool that helps to capture every schema change as a migration script and ensures that the database accurately reflects the data models. These data migration scripts can be automatically generated. Adding `Alembic` to the service would reduce the amount of work the developer needs to do in order to maintain a traditional RDBMS and reduce the likelihood of errors. The tool is easy to get started with and would be an easy win.
 
 ### Scaling
-Depending on how the service grow's over time, there are some additional steps we could take to help it scale.
+Depending on how the service grows over time, there are some additional steps we could take to help it scale.
 
 ### Scaling the database
- Database's such as Postgres are capable of growing to massive scales. However, they're typically hard to scale which becomes more of a problem when you consider the shift-left-infrastructure movement where developers are taking on more and more dev-ops work. Given this, if the service needed to be massively scaled we might want to consider something like AWS DynamoDB. Dynamo has been built to be easy to scale, and generally doesn't leave any room for design patterns that don't scale well. It's also incredebly easy to manage. These points would make it a good option for moving to a more easily scalable database.
+ Databases such as Postgres are capable of growing to massive scales. However, they're typically hard to scale which becomes more of a problem when you consider the shift-left-infrastructure movement where developers are taking on more and more dev-ops work. Given this, if the service needed to be massively scaled we might want to consider something like AWS DynamoDB. Dynamo has been built to be easy to scale and generally doesn't leave any room for design patterns that don't scale well. It's also incredibly easy to manage. These points would make it a good option for moving to a more easily scalable database.
 
- One of the downside's of DynamoDB is you can typically only make full use of it when you're confident about what your services data-access patterns will look like, as you need to design the table according to them. Another downside is that it doesn't support the complex searching / filtering that we've been able to do in Postgres. In order to meet that need for the service, we'd likely also need to include `AWS CloudSearch` on top of our `AWS DynamoDB Table`.
+ One of the downsides of DynamoDB is you can typically only make full use of it when you're confident about what your service's data-access patterns will look like, as you need to design the table according to them. Another downside is that it doesn't support the complex searching/filtering that we've been able to do in Postgres. In order to meet that need for the service, we'd likely also need to include `AWS CloudSearch` on top of our `AWS DynamoDB Table`.
 
 ### Scaling the API.
-While the API is scalable out of the box, through the use of something like `AWS ECS`, we could potentially make it even more scalable by migrating to a `lambda-per-endpoint` model with the use of `AWS Lambda` & `AWS API Gateway`. This would essentially allow the API to scale infintely to the demand on the service at any given time, and could make the service more resilliant to bug's that effect multiple endpoints. It comes with increased development overhead, but it can be mitigated against by using appropriate tooling.
-
+While the API is scalable out of the box, through the use of something like `AWS ECS`, we could potentially make it even more scalable by migrating to a `lambda-per-endpoint` model with the use of `AWS Lambda` & `AWS API Gateway`. This would essentially allow the API to scale infinitely to the demand on the service at any given time and could make the service more resilient to bugs that affect multiple endpoints. It comes with an increased development overhead, but this can be mitigated by using appropriate tooling.
 
 ### Logging & Service Monitoring
-One potential point of imporvement would be to add [Sentry](https://sentry.io/) into the application. This would notify us when unhandled exceptions have been raised in the service, allow us to view all the details surrounding these exceptions and then triage the issue in order to solve it.
+One potential point of improvement would be to add [Sentry](https://sentry.io/) into the application. This would notify us when unhandled exceptions have been raised in the service, allow us to view all the details surrounding these exceptions and then triage the issue in order to solve it.
 
 It would also be useful to create several dashboards with key health information about the service using a tool such as [Grafana](https://grafana.com/)
 
-In order to get better information from our logging, we could also bind a `trace-id` to our logging context. This would allow us to trace a request, and get all of the relevant logs for a given request in a single query. In my experence, this has dramatically reduced the amount of time it's taken me to solve bugs in the past.
+In order to get better information from our logging, we could also bind a `trace-id` to our logging context. This would allow us to trace a request, and get all of the relevant logs for a given request in a single query. In my experience, this has dramatically reduced the amount of time it's taken me to solve bugs in the past.
 
 ### Infrastructure As Code & CI/CD
 By adding some infrastructure as code tooling such as `Terraform`, `Serverless` or `CloudFormation` we could dramatically reduce the time & complexity of managing our infrastructure.
 
-By adding a rhobust CI/CD Pipeline we would reduce the management overhead of deploying new versions of the service to our servers / cloud provider. Ideally, the CI/CD pipeline would also act as a secondary quality control gate (After PR/MR), that could ensure all unit test's pass, all code is linted and any other additional quality steps we wanted to take.
+By adding a robust CI/CD Pipeline we would reduce the management overhead of deploying new versions of the service to our servers/cloud provider. Ideally, the CI/CD pipeline would also act as a secondary quality control gate (After PR/MR), that could ensure all unit tests pass, all code is linted and any other additional quality steps we wanted to take.
