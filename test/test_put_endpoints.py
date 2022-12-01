@@ -1,3 +1,5 @@
+"""Module to hold all of the tests for PUT endpoints."""
+
 from uuid import UUID
 from http import HTTPStatus
 from datetime import date
@@ -17,6 +19,14 @@ def test_can_update_service_provider(
     service_provider: schemas.NewServiceProviderInSchema,
     user_id: UUID,
 ) -> None:
+    """Test that we can update a service provider.
+
+    Args:
+        test_client (TestClient): The test client to use to make the request.
+        create_service_provider_in_db (models.ServiceProvider): The service provider to update.
+        service_provider (schemas.NewServiceProviderInSchema): The new service provider data.
+        user_id (UUID): The user id to use to make the request.
+    """
 
     # change the name on the service provider
     service_provider.name = "New Name"
@@ -37,7 +47,7 @@ def test_can_update_service_provider(
     json_response = response.json()
     schemas.ServiceProviderSchema(**json_response)
 
-    # check that the service provder name has been updated
+    # check that the service provider name has been updated
     if json_response["name"] != "New Name":
         pytest.fail("Service provider name not updated")
 
@@ -47,6 +57,13 @@ def test_cant_update_service_provider_we_dont_own(
     create_service_provider_in_db: models.ServiceProvider,
     service_provider: schemas.NewServiceProviderInSchema,
 ) -> None:
+    """Test that we cant update a service provider we don't own.
+
+    Args:
+        test_client (TestClient): The test client to use to make the request.
+        create_service_provider_in_db (models.ServiceProvider): The service provider to update.
+        service_provider (schemas.NewServiceProviderInSchema): The new service provider data.
+    """
 
     # change the name on the service provider
     service_provider.name = "New Name"
@@ -70,6 +87,15 @@ def test_can_update_availability(
     user_id: UUID,
     db_connection: Session,
 ):
+    """Test that we can update the availability of a service provider.
+
+    Args:
+        test_client (TestClient): The test client to use to make the request.
+        create_service_provider_in_db (models.ServiceProvider): The service provider to update.
+        service_provider (schemas.NewServiceProviderInSchema): The new service provider data.
+        user_id (UUID): The user id to use to make the request.
+        db_connection (Session): The database connection to use to check the database.
+    """
 
     # change the name on the service provider
     service_provider.availability = [
@@ -90,7 +116,7 @@ def test_can_update_availability(
     if response.status_code != HTTPStatus.OK:
         pytest.fail("Could not update the availability of the service provider.")
 
-    # check the service provider is updated in the databse
+    # check the service provider is updated in the database
     service_provider = (
         db_connection.query(models.ServiceProvider)
         .filter(models.ServiceProvider.id == create_service_provider_in_db.id)
@@ -110,6 +136,16 @@ def test_can_update_skills(
     user_id: UUID,
     db_connection: Session,
 ):
+    """Test that we can update the skills of a service provider.
+
+    Args:
+        test_client (TestClient): The test client to use to make the request.
+        create_service_provider_in_db (models.ServiceProvider): The service provider to update.
+        service_provider (schemas.NewServiceProviderInSchema): The new service provider data.
+        user_id (UUID): The user id to use to make the request.
+        db_connection (Session): The database connection to use to check the database.
+    """
+
     # change the skills of the service provider
     skills = ["Software Engineering", "Python", "Django", "FastAPI", "SQLAlchemy"]
     service_provider.skills = skills

@@ -1,3 +1,5 @@
+"""Module to hold the unit tests for the Service Provider Repository."""
+
 from uuid import UUID
 
 import pytest
@@ -15,6 +17,13 @@ def test_can_create_service_provider(
     user_id: UUID,
     db_connection: Session,
 ) -> None:
+    """Test that a service provider can be created by the Repo.
+
+    Args:
+        service_provider (NewServiceProviderInSchema): The service provider.
+        user_id (UUID): The user ID of the user who created the service provider.
+        db_connection (Session): The database connection.
+    """
 
     # setup
     new_service_provider = ServiceProviderRepository.new(
