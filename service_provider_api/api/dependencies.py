@@ -28,7 +28,7 @@ def get_db() -> Session:
 
 
 @dataclass
-class ServiceProviderRecomendationParams:
+class ServiceProviderRecommendationParams:
     """A class used to represent the parameters used to filter recommended
     service providers.
 

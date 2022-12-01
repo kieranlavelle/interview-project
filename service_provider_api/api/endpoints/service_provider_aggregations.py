@@ -1,3 +1,6 @@
+"""Module to hold all of the endpoints that return collections of
+service providers."""
+
 from http import HTTPStatus
 
 import structlog
@@ -5,15 +8,15 @@ from fastapi import APIRouter, Depends
 from fastapi_versioning import version
 from sqlalchemy.orm import Session
 
+from service_provider_api.api import schemas
 from service_provider_api.api.dependencies import (
-    get_db,
     ListFilterParams,
-    ServiceProviderRecomendationParams,
+    ServiceProviderRecommendationParams,
+    get_db,
 )
 from service_provider_api.core.repositories.service_provider import (
     ServiceProviderRepository,
 )
-from service_provider_api.api import schemas
 
 router = APIRouter(prefix="/service-providers")
 log = structlog.get_logger()
@@ -25,6 +28,17 @@ async def search_service_provider(
     params: ListFilterParams = Depends(),
     db: Session = Depends(get_db),
 ) -> dict:
+    """Endpoint to search for service providers.
+
+    Args:
+        params (ListFilterParams): The query parameters to filter the search.
+        db (Session): The database session.
+
+    Returns:
+        dict: A dictionary containing the service providers that matched
+        the filters provided by the user in the `params` argument.
+    """
+
     log.info("Searching for service providers", params=params)
     service_providers = ServiceProviderRepository.list(db, params)
     return schemas.ServiceProvidersList(
@@ -37,9 +51,23 @@ async def search_service_provider(
 )
 @version(1, 0)
 async def recommend_service_provider(
-    params: ServiceProviderRecomendationParams = Depends(),
+    params: ServiceProviderRecommendationParams = Depends(),
     db: Session = Depends(get_db),
 ) -> dict:
+    """Endpoint to recommend a service provider based on filters.
+
+    Args:
+        params (ServiceProviderRecommendationParams): The query parameters to
+            filter the search by.
+        db (Session): The database session.
+
+    Returns:
+        dict: A dictionary containing the service provider that matched
+        the filters provided by the user in the `params` argument. This is
+        ordered according to the most relevant service provider first.
+    """
+    # TODO: Check the most relevant service provider is returned first.
+
     log.info("Searching for recommended service providers", params=params)
 
     max_cost_per_day = params.job_budget_in_pence / params.expected_job_duration_in_days
