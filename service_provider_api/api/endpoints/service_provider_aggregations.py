@@ -24,7 +24,7 @@ log = structlog.get_logger()
 
 @router.get("/", responses={HTTPStatus.OK: {"model": schemas.ServiceProviderSchema}})
 @version(1, 0)
-async def search_service_provider(
+def search_service_provider(
     params: ListFilterParams = Depends(),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -50,7 +50,7 @@ async def search_service_provider(
     "/recommend", responses={HTTPStatus.OK: {"model": schemas.ServiceProviderSchema}}
 )
 @version(1, 0)
-async def recommend_service_provider(
+def recommend_service_provider(
     params: ServiceProviderRecommendationParams = Depends(),
     db: Session = Depends(get_db),
 ) -> dict:

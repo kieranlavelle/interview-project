@@ -1,11 +1,11 @@
+"""Module to hold all of the database setup logic."""
+
+import psycopg2.extras
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import psycopg2.extras
-
 
 from service_provider_api.core.config import settings
-
 
 # need to call this
 # before working with UUID objects in PostgreSQL

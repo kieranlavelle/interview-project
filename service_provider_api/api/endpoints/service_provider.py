@@ -30,7 +30,7 @@ log = structlog.get_logger()
     },
 )
 @version(1, 0)
-async def create_service_provider(
+def create_service_provider(
     provider: schemas.NewServiceProviderInSchema,
     response: Response,
     user_id: UUID = Header(),
@@ -75,7 +75,7 @@ async def create_service_provider(
     },
 )
 @version(1, 0)
-async def add_service_provider_review(
+def add_service_provider_review(
     service_provider_id: UUID,
     review: schemas.NewServiceProviderReview,
     response: Response,
@@ -125,7 +125,7 @@ async def add_service_provider_review(
     },
 )
 @version(1, 0)
-async def get_service_provider(
+def get_service_provider(
     service_provider_id: UUID,
     response: Response,
     db: Session = Depends(get_db),
@@ -164,7 +164,7 @@ async def get_service_provider(
     },
 )
 @version(1, 0)
-async def update_service_provider(
+def update_service_provider(
     service_provider_id: UUID,
     updated_service_provider: schemas.NewServiceProviderInSchema,
     response: Response,
@@ -216,7 +216,7 @@ async def update_service_provider(
     },
 )
 @version(1, 0)
-async def delete_service_provider(
+def delete_service_provider(
     service_provider_id: UUID,
     response: Response,
     user_id: UUID = Header(),
