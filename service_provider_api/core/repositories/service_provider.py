@@ -7,12 +7,10 @@ from sqlalchemy import exc
 from sqlalchemy.sql import func
 import structlog
 
-from service_provider_api.api.dependencies import (
-    ListFilterParams,
-    list_pairs,
-)
+from service_provider_api.api.dependencies import ListFilterParams
 from service_provider_api.database import models
 from service_provider_api.api import schemas
+from service_provider_api.core.utils import list_pairs
 
 log = structlog.get_logger()
 
