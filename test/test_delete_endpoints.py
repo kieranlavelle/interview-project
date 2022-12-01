@@ -1,3 +1,5 @@
+"""Module to hold all of the unit-tests that make delete requests to the API."""
+
 from uuid import UUID
 from http import HTTPStatus
 
@@ -8,9 +10,16 @@ from sqlalchemy.orm import Session
 from service_provider_api.database import models
 
 
-def test_cant_delete_for_non_existant_service_provider(
+def test_cant_delete_for_non_existent_service_provider(
     test_client: TestClient, user_id: UUID
 ) -> None:
+    """Test that we can't delete a service provider that doesn't exist
+
+    Args:
+        test_client (TestClient): The FastAPI test client.
+        user_id (UUID): The user ID who created the service provider.
+    """
+
     response = test_client.delete(
         "/v1_0/service-provider/00000000-0000-0000-0000-000000000000",
         headers={"user-id": str(user_id)},
@@ -22,6 +31,14 @@ def test_cant_delete_for_non_existant_service_provider(
 def test_user_cant_delete_service_provider_they_dont_own(
     test_client: TestClient, create_service_provider_reviews_in_db: models.Reviews
 ) -> None:
+    """Test that a user can't delete a service provider they don't own.
+
+    Args:
+        test_client (TestClient): The FastAPI test client.
+        create_service_provider_reviews_in_db (models.Reviews): The service provider
+            that was created in the database.
+    """
+
     response = test_client.delete(
         f"/v1_0/service-provider/{create_service_provider_reviews_in_db.service_provider_id}",
         headers={"user-id": "00000000-0000-0000-0000-000000000000"},
@@ -35,7 +52,16 @@ def test_delete_service_provider(
     user_id: UUID,
     create_service_provider_reviews_in_db: models.Reviews,
 ) -> None:
-    """Test that the API returns a service provider with reviews calculated"""
+    """Test that we can delete a service provider.
+
+    In order to delete the service provider, it must exist and the user must own it.s
+
+    Args:
+        test_client (TestClient): The FastAPI test client.
+        user_id (UUID): The user ID who created the service provider.
+        create_service_provider_reviews_in_db (models.Reviews): The service provider
+            that was created in the database.
+    """
 
     response = test_client.delete(
         f"/v1_0/service-provider/{create_service_provider_reviews_in_db.service_provider_id}",
@@ -56,6 +82,20 @@ def test_deleting_service_provider_cascades(
     create_service_provider_reviews_in_db: models.Reviews,
     db_connection: Session,
 ) -> None:
+    """Test that deleting a service provider cascades.
+
+    When we delete a service provider we also want to delete:
+        - All of the reviews for that service provider.
+        - All of the availabilities for that service provider.
+        - All of the skills for that service provider.
+
+    Args:
+        test_client (TestClient): The FastAPI test client.
+        user_id (UUID): The user ID who created the service provider.
+        create_service_provider_reviews_in_db (models.Reviews): The service provider
+            that was created in the database.
+        db_connection (Session): The database connection.
+    """
 
     # check the service prover is in the database
     service_provider = (
