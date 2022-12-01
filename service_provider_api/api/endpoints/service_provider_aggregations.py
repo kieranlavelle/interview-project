@@ -66,7 +66,6 @@ def recommend_service_provider(
         the filters provided by the user in the `params` argument. This is
         ordered according to the most relevant service provider first.
     """
-    # TODO: Check the most relevant service provider is returned first.
 
     log.info("Searching for recommended service providers", params=params)
 

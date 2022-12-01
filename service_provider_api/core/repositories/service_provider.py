@@ -278,7 +278,7 @@ class ServiceProviderRepository:
         """
 
         query = db.query(models.ServiceProvider).order_by(
-            models.ServiceProvider.cost_in_pence
+            models.ServiceProvider.cost_in_pence.desc()
         )
 
         # add the review conditions if there are any reviews
@@ -294,7 +294,7 @@ class ServiceProviderRepository:
                     .having(func.avg(models.Reviews.rating) <= filters.reviews_lt)
                 )
                 .group_by(models.ServiceProvider.id)
-                .order_by(func.avg(models.Reviews.rating))
+                .order_by(func.avg(models.Reviews.rating).desc())
             )
 
         # relationship filters have to work using joins as sqlalchemy doesn't support

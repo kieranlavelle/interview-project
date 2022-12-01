@@ -11,9 +11,6 @@ from service_provider_api.database import models
 from service_provider_api.api import schemas
 
 
-# TODO: Come back and check payloads
-
-
 def test_can_create_service_provider(
     test_client: TestClient,
     service_provider: schemas.NewServiceProviderInSchema,
@@ -39,7 +36,20 @@ def test_can_create_service_provider(
 
     # check we get the correct type back
     # coerce the response type, if it raises an error the test will fail
-    schemas.ServiceProviderSchema(**response.json())
+    response_schema = schemas.ServiceProviderSchema(**response.json())
+
+    expected_response = schemas.ServiceProviderSchema(
+        id=UUID(response.json()["id"]),
+        name=service_provider.name,
+        skills=service_provider.skills,
+        cost_in_pence=service_provider.cost_in_pence,
+        availability=service_provider.availability,
+        review_rating=0.0,
+    )
+
+    # check the service provider we get back is the one we created
+    if expected_response != response_schema:
+        pytest.fail("Service provider received from API does not match the one sent")
 
 
 def test_can_create_service_provider_review(
