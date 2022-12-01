@@ -157,14 +157,24 @@ The most appropriate service provider is determined using the following process:
 3. Add additional validation to the endpoint to make sure that the `expected_job_duration_in_days` parameter is consistent with the `availability` parameter. I.e if the user provides the date range `date(2022, 1, 1) -> date(2022, 1, 2)` but sets `expected_job_duration_in_days` to `50`, then that is invalid.
 
 ## Task 4 - How else would you enhance the system.
-- async
+
+### Improvements to Reviews
+As part of `#Task 3`, I changed the way reviews work. There are further modifications that could be made to reviews to improve them.
+1. As there is more complexity surrounding review's when compared to the other sub-resources of a service provider, it might be good to de-couple the resource from the service provider by creating a new micro-service. This would have several advantages such as:
+    1. Decreasing the complexity of the `service-provider-api`, making it easier to maintain.
+    1. Increasing the resiliancy of the services overall, as if the `reviews-service` breaks, the `service-provider-api` can still continue to function (although some features will temporarly break, such as displaying reviews.)
+1. Reviews could support adding comments, the change itself would be trivial, but you'd likely want to implement some sort of content moderation to ensure the reviews on the comments are appropriate.
+1. User's should not be able to review their own content. This would be trivial in the current code base as we could simply do a check that `service_provider.user_id != review_user.user_id`.
+1. Review's could be added on a per-skill basis. This would allow us to give more accurate recommendations to our users.
+1. Store an eventually consistent estimate of a `service_providers` average skill. This would make queires for fetching service providers faster.
+
+### Async
+Out of the box `FastAPI` has good support for sync & async code and endpoint handlers. Even when the endpoint handler's are defined synchronously `def endpoind_handler(...)`, FastAPI can simultanesoly serve multiple requests by using a thread pool. Handler's should only be defined as async, when the code inside them is non-blocking. `SQLAlchemy` supports non-blocking async database connections (document's can be found [here](https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html)) so it's possible to make our API asynchronus. The primary advantage of this would be allowing the service to have better utilisation of resources as it can do other work (serve other requests more efficiently) while it is waiting for I/O bound tasks such as reading from the database. This would make our API feel more responsive, and would allow us to serve more users as requests would execute faster.
+
+### Other improvements
 - Turned into a lambda API / application so we could sclae endpoints.
 - DynamoDB depending on the scale needed
-- Split reviews out into a seperate micro-service
 - Add end-to-end trace-ids???
 - Add elebic to support db-migrations
-- Store review-count so it doesnt have to be calculated
-- Add comments to the review object
 - filter the skills that can be added / add a skills search to populate a dropdown
 - sentry
-- review ratings could be per skill and have a date added field, user cant review own work....
