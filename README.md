@@ -1,7 +1,7 @@
 # interview-project
 
 ## Requirements
-*In order to run the project there are a couple of pre-requisits. These are listed and explained below.*
+*In order to run the project there are a couple of prerequisites. These are listed and explained below.*
 #### [Poetry](https://python-poetry.org/)
 *installation guide: [here](https://python-poetry.org/docs/)*
 
@@ -10,7 +10,10 @@ Poetry is the dependency management tool which I chose to use for the project. I
 #### [Docker](https://www.docker.com/)
 *installation guide: [here](https://docs.docker.com/get-docker/)*
 
-Docker is used to containerse the application in order to make it easily deployable/runnable anywhere. In order to build the project, and the databases it depends on, Docker must be installed.
+Docker is used to containerize the application in order to make it easily deployable/runnable anywhere. In order to build the project, and the databases it depends on, Docker must be installed.
+
+#### Python
+The service is built in Python, and depends on version 3.10^ as some modern language features have been used in the project.
 
 ## Running the project
 Once the dependencies specified in the *Requirements* section of the `README.md` have been installed you can begin working on & deploying the application. In order to aid with this, a number of commands have been provided in the `Makefile`. An explanation of those commands can be found below.
@@ -21,6 +24,7 @@ Once the dependencies specified in the *Requirements* section of the `README.md`
 - `make db-down`: Removes any local running instances of the database.
 - `make app-up`: Build's and run's a complete local version of the application (database & API).
 - `make app-down`: Removes any locally running version of the application (database & API)
+
 
 ## Unit-tests
 
