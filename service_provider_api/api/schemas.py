@@ -195,6 +195,4 @@ class ServiceProviderListFilterParams(BaseSchema):
     skills: Optional[list[str]] = Field(default=None)
     cost_gt: Optional[int] = Field(default=None)
     cost_lt: Optional[int] = Field(default=None)
-    availability: Optional[list[ServiceProviderAvailabilitySchema]] = Field(
-        default=None
-    )
+    availability: Optional[list[ServiceProviderAvailabilitySchema]] = Field(default=[])
