@@ -30,7 +30,7 @@ def test_list_service_providers_name_filter(
         expected_provider (str): The expected provider name to get back over the API.
     """
 
-    response = test_client.get("/v1_0/service-providers", params={"name": name})
+    response = test_client.post("/v1_0/service-providers", json={"name": name})
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -59,12 +59,14 @@ def test_list_service_providers_skills_filter(
 
     Args:
         test_client (TestClient): The test client fixture.
-        create_multiple_service_providers_in_db (models.ServiceProvider): The service provider fixture.
+        create_multiple_service_providers_in_db (models.ServiceProvider): The service
+            provider fixture.
         skills (list[str]): The skills to filter by.
-        expected_providers (set[str]): The expected provider names to get back over the API.
+        expected_providers (set[str]): The expected provider names to get back over the
+            API.
     """
 
-    response = test_client.get("/v1_0/service-providers", params={"skills": skills})
+    response = test_client.post("/v1_0/service-providers", json={"skills": skills})
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -98,15 +100,17 @@ def test_list_service_providers_cost_filter(
 
     Args:
         test_client (TestClient): The test client fixture.
-        create_multiple_service_providers_in_db (models.ServiceProvider): The service provider fixture.
+        create_multiple_service_providers_in_db (models.ServiceProvider): The service
+            provider fixture.
         cost_lt (int): The upper bound cost to filter by.
         cost_gt (int): The lower bound cost to filter by.
-        expected_providers (set[str]): The expected provider names to get back over the API.
+        expected_providers (set[str]): The expected provider names to get back over the
+            API.
     """
 
     params = {"cost_lt": cost_lt, "cost_gt": cost_gt}
     params = {k: v for k, v in params.items() if v is not None}
-    response = test_client.get("/v1_0/service-providers", params=params)
+    response = test_client.post("/v1_0/service-providers", json=params)
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -139,15 +143,17 @@ def test_list_service_providers_review_filter(
 
     Args:
         test_client (TestClient): The test client fixture.
-        create_multiple_service_provider_reviews_in_db (models.Reviews): The service provider reviews fixture.
+        create_multiple_service_provider_reviews_in_db (models.Reviews): The service
+            provider reviews fixture.
         reviews_lt (float): The upper bound review to filter by.
         reviews_gt (float): The lower bound review to filter by.
-        expected_providers (set[str]): The expected provider names to get back over the API.
+        expected_providers (set[str]): The expected provider names to get back over the
+            API.
     """
 
     params = {"reviews_lt": reviews_lt, "reviews_gt": reviews_gt}
     params = {k: v for k, v in params.items() if v is not None}
-    response = test_client.get("/v1_0/service-providers", params=params)
+    response = test_client.post("/v1_0/service-providers", json=params)
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -165,12 +171,30 @@ def test_list_service_providers_review_filter(
     "availability,expected_providers",
     [
         (
-            [date(2020, 1, 1).isoformat(), date(2021, 12, 28).isoformat()],
+            [
+                {
+                    "from_date": date(2020, 1, 1).isoformat(),
+                    "to_date": date(2021, 12, 28).isoformat(),
+                }
+            ],
             {"John Smith"},
         ),
-        ([date(2022, 1, 1).isoformat(), date(2023, 1, 1).isoformat()], {"Dean Greene"}),
         (
-            [date(2020, 1, 1).isoformat(), date(2023, 1, 1).isoformat()],
+            [
+                {
+                    "from_date": date(2022, 1, 1).isoformat(),
+                    "to_date": date(2023, 1, 1).isoformat(),
+                }
+            ],
+            {"Dean Greene"},
+        ),
+        (
+            [
+                {
+                    "from_date": date(2020, 1, 1).isoformat(),
+                    "to_date": date(2023, 1, 1).isoformat(),
+                }
+            ],
             {"John Smith", "Dean Greene"},
         ),
     ],
@@ -185,13 +209,15 @@ def test_list_service_providers_availability_filter(
 
     Args:
         test_client (TestClient): The test client fixture.
-        create_multiple_service_provider_reviews_in_db (models.Reviews): The service provider reviews fixture.
+        create_multiple_service_provider_reviews_in_db (models.Reviews): The service
+            provider reviews fixture.
         availability (list[str]): The availability to filter by.
-        expected_providers (set[str]): The expected provider names to get back over the API.
+        expected_providers (set[str]): The expected provider names to get back over the
+            API.
     """
 
     params = {"availability": availability}
-    response = test_client.get("/v1_0/service-providers", params=params)
+    response = test_client.post("/v1_0/service-providers", json=params)
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -213,7 +239,12 @@ def test_list_service_providers_availability_filter(
             ["plumbing", "SEO"],
             3,
             5000,
-            [date(2020, 1, 1).isoformat(), date(2024, 12, 28).isoformat()],
+            [
+                {
+                    "from_date": date(2020, 1, 1).isoformat(),
+                    "to_date": date(2024, 12, 28).isoformat(),
+                }
+            ],
             {"John Smith"},
         ),
         (
@@ -221,7 +252,12 @@ def test_list_service_providers_availability_filter(
             ["plumbing", "SEO"],
             3,
             7000,
-            [date(2020, 1, 1).isoformat(), date(2024, 12, 28).isoformat()],
+            [
+                {
+                    "from_date": date(2020, 1, 1).isoformat(),
+                    "to_date": date(2024, 12, 28).isoformat(),
+                }
+            ],
             {"John Smith", "Dean Greene"},
         ),
         (
@@ -229,7 +265,12 @@ def test_list_service_providers_availability_filter(
             ["plumbing", "SEO"],
             3,
             7000,
-            [date(2020, 1, 1).isoformat(), date(2021, 5, 1).isoformat()],
+            [
+                {
+                    "from_date": date(2020, 1, 1).isoformat(),
+                    "to_date": date(2021, 5, 1).isoformat(),
+                },
+            ],
             {"John Smith"},
         ),
     ],
@@ -249,23 +290,25 @@ def test_can_get_recommended_service_providers(
 
     Args:
         test_client (TestClient): The test client fixture.
-        create_multiple_service_provider_reviews_in_db (models.Reviews): The service provider reviews fixture.
+        create_multiple_service_provider_reviews_in_db (models.Reviews): The service
+            provider reviews fixture.
         min_rating (int): The upper bound rating to filter by.
         skills (list[str]): The skills to filter by.
         expected_days (int): The expected days to complete the project.
         budget (int): The budget of the project.
         availability (list[str]): The availability to filter by.
-        expected_providers (set[str]): The expected provider names to get back over the API.
+        expected_providers (set[str]): The expected provider names to get back over the
+            API.
     """
 
-    params = {
+    payload = {
         "expected_job_duration_in_days": expected_days,
         "job_budget_in_pence": budget,
         "skills": skills,
         "availability": availability,
         "minimum_review_rating": min_rating,
     }
-    response = test_client.get("/v1_0/service-providers/recommend", params=params)
+    response = test_client.post("/v1_0/service-providers/recommend", json=payload)
 
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -287,11 +330,12 @@ def test_pagintation(
 
     Args:
         test_client (TestClient): The test client fixture.
-        create_multiple_service_provider_reviews_in_db (models.Reviews): The service provider reviews fixture.
+        create_multiple_service_provider_reviews_in_db (models.Reviews): The service
+            provider reviews fixture.
     """
 
-    response = test_client.get(
-        "/v1_0/service-providers", params={"page": 1, "page_size": 1}
+    response = test_client.post(
+        "/v1_0/service-providers", params={"page": 1, "page_size": 1}, json={}
     )
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")
@@ -300,8 +344,8 @@ def test_pagintation(
         pytest.fail("Did not get the expected number of service providers")
 
     # get the second page
-    response = test_client.get(
-        "/v1_0/service-providers", params={"page": 2, "page_size": 1}
+    response = test_client.post(
+        "/v1_0/service-providers", params={"page": 2, "page_size": 1}, json={}
     )
     if response.status_code != HTTPStatus.OK:
         pytest.fail("API returned a status code other than 200")

@@ -13,7 +13,6 @@ from sqlalchemy.sql.functions import coalesce
 
 
 from service_provider_api.api import schemas
-from service_provider_api.api.dependencies import ListFilterParams
 from service_provider_api.core.utils import list_pairs
 from service_provider_api.database import models
 
@@ -231,7 +230,9 @@ class ServiceProviderRepository:
     @staticmethod
     def list(
         db: Session,
-        filters: ListFilterParams,
+        filters: schemas.ServiceProviderListFilterParams,
+        page: int,
+        page_size: int,
     ) -> list[models.ServiceProvider]:
         """Gets all service providers from the database.
 
@@ -246,9 +247,7 @@ class ServiceProviderRepository:
             exc.SQLAlchemyError: If the query fails.
         """
 
-        offset = ServiceProviderRepository._calculate_offset(
-            filters.page, filters.page_size
-        )
+        offset = ServiceProviderRepository._calculate_offset(page, page_size)
 
         # create all of the conditions for the query
         conditions = ServiceProviderRepository._generate_conditions_for_listing(filters)
@@ -257,7 +256,7 @@ class ServiceProviderRepository:
         )
         service_providers_query = service_providers_query.filter(*conditions)
         service_providers = (
-            service_providers_query.offset(offset).limit(filters.page_size).all()
+            service_providers_query.offset(offset).limit(page_size).all()
         )
 
         return service_providers
@@ -281,11 +280,14 @@ class ServiceProviderRepository:
         return (page - 1) * page_size
 
     @staticmethod
-    def _perform_joins_for_listing(filters: ListFilterParams, db: Session):
+    def _perform_joins_for_listing(
+        filters: schemas.ServiceProviderListFilterParams, db: Session
+    ):
         """Performs the joins for the search query.
 
         Args:
-            filters (ListFilterParams): The filters to apply to the query.
+            filters (schemas.ServiceProviderListFilterParams): The filters to apply
+                to the query.
             query (Query): The query to perform the joins on.
 
         Returns:
@@ -309,8 +311,8 @@ class ServiceProviderRepository:
                 models.Skills.skill.in_(filters.skills)
             )
 
-        for lower, upper in list_pairs(filters.availability):
-            the_daterange = DateRange(lower, upper)
+        for availability in filters.availability:
+            the_daterange = DateRange(availability.from_date, availability.to_date)
             query = query.join(models.Availability).filter(
                 models.Availability.availability.contained_by(the_daterange)
             )
@@ -318,7 +320,9 @@ class ServiceProviderRepository:
         return query
 
     @staticmethod
-    def _generate_conditions_for_listing(filters: ListFilterParams) -> list:
+    def _generate_conditions_for_listing(
+        filters: schemas.ServiceProviderListFilterParams,
+    ) -> list:
         conditions = []
         if filters.name:
             conditions.append(models.ServiceProvider.name == filters.name)

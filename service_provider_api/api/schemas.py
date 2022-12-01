@@ -1,8 +1,9 @@
 from uuid import UUID
 from datetime import date
+from typing import Optional
 
 import orjson
-from pydantic import validator, root_validator, BaseModel
+from pydantic import validator, root_validator, BaseModel, Field
 
 
 class BaseSchema(BaseModel):
@@ -146,3 +147,54 @@ class ServiceProvidersList(BaseSchema):
     """
 
     service_providers: list[ServiceProviderSchema]
+
+
+class ServiceProviderRecommendationParams(BaseSchema):
+    """A class used to represent the body used to filter recommended
+    service providers.
+
+    A class has been used as there are multiple parameters that need to be
+    validated together & because there are a large number of parameters.
+
+    Args:
+        expected_job_duration_in_days (int, optional): The expected duration
+            of the job in days. Defaults to 1.
+        job_budget_in_pence (int, optional): The maximum budget for the job.
+        skills (list, optional): A list of skills that the service provider has.
+        minimum_review_rating (float, optional): The minimum review rating.
+    """
+
+    expected_job_duration_in_days: int = Field(default=1, ge=1)
+    job_budget_in_pence: int = Field(ge=1)
+    skills: list[str] = Field()
+    availability: list[ServiceProviderAvailabilitySchema]
+    minimum_review_rating: Optional[float] = Field(default=0, le=5, ge=0)
+
+
+class ServiceProviderListFilterParams(BaseSchema):
+    """A class used to represent the body used to filter listed
+    service providers.
+
+    A class has been used as there are multiple parameters that need to be
+    validated together & because there are a large number of parameters.
+
+    Args:
+        reviews_lt (int, optional): The maximum average review of the service provider.
+        reviews_gt (int, optional): The minimum average review of the service provider.
+        name (str, optional): The name of the service provider to filter by.
+        skills (list, optional): A list of skills that the service provider needs.
+        cost_gt (int, optional): The minimum cost of the service provider.
+        cost_lt (int, optional): The maximum cost of the service provider.
+        availability (list, optional): A list of dates ranges that the service provider
+            has to be available.
+    """
+
+    reviews_gt: float = Field(default=0, ge=0, le=5)
+    reviews_lt: float = Field(default=5, le=5, ge=0)
+    name: Optional[str] = Field(default=None)
+    skills: Optional[list[str]] = Field(default=None)
+    cost_gt: Optional[int] = Field(default=None)
+    cost_lt: Optional[int] = Field(default=None)
+    availability: Optional[list[ServiceProviderAvailabilitySchema]] = Field(
+        default=None
+    )
