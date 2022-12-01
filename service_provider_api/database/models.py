@@ -24,8 +24,10 @@ class ServiceProvider(Base):
         name (str): The name of the service provider.
         cost_in_pence (int): The cost of the service provider in pence.
         skills (List[ServiceProviderSkill]): The skills of the service provider.
-        availability (List[ServiceProviderAvailability]): The availability of the service provider.
-        review_rating (List[ServiceProviderReviewRating]): The review ratings of the service provider.
+        availability (List[ServiceProviderAvailability]): The availability of the
+            service provider.
+        review_rating (List[ServiceProviderReviewRating]): The review ratings of the
+            service provider.
     """
 
     __tablename__ = "service_providers"
@@ -41,9 +43,7 @@ class ServiceProvider(Base):
     availability = relationship(
         "Availability", backref="service_provider", cascade="all, delete-orphan"
     )
-    review_rating = relationship(
-        "Reviews", backref="service_provider", cascade="all, delete-orphan"
-    )
+    review_rating = relationship("Reviews", backref="service_provider")
 
     def _calculate_review_rating(self) -> float:
         """Calculate the average review rating for the service provider.

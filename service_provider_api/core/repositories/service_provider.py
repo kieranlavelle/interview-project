@@ -9,6 +9,8 @@ from psycopg2.extras import DateRange
 from sqlalchemy import exc
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
+from sqlalchemy.sql.functions import coalesce
+
 
 from service_provider_api.api import schemas
 from service_provider_api.api.dependencies import ListFilterParams
@@ -143,7 +145,9 @@ class ServiceProviderRepository:
             None
 
         Raises:
-            FailedToDeleteServiceProvider: If the service provider could not be deleted."""
+            FailedToDeleteServiceProvider: If the service provider could not be
+                deleted.
+        """
 
         try:
             service_provider = ServiceProviderRepository.get(
@@ -154,7 +158,13 @@ class ServiceProviderRepository:
                 raise ServiceProviderNotFound
 
             # save our changes to the db
+            # delete our service provider reviews as they dont cascade delete due to
+            # us using delete in our PUT, we dont want to delete all reviews when we
+            # are updating a service provider.
             db.delete(service_provider)
+            db.query(models.Reviews).filter(
+                models.Reviews.service_provider_id == service_provider_id
+            ).delete()
             db.commit()
 
         except exc.SQLAlchemyError as e:
@@ -170,16 +180,20 @@ class ServiceProviderRepository:
         """Updates a service provider in the database.
 
         Args:
-            updated_service_provider (ServiceProviderSchema): The updated service provider
-            service_provider_id (UUID): The ID of the service provider to update.
-            user_id (UUID): The user id of the user making the request. They must own the service provider.
+            updated_service_provider (ServiceProviderSchema): The updated service
+                provider
+            service_provider_id (UUID): The ID of the service provider to
+                update.
+            user_id (UUID): The user id of the user making the request.
+                They must own the service provider.
             db (Session): The database session
 
         Returns:
             ServiceProvider (models.ServiceProvider): The updated service provider.
 
         Raises:
-            ServiceProviderNotFound: If the service provider is not found in the database
+            ServiceProviderNotFound: If the service provider is not found in the
+                database
             FailedToUpdateServiceProvider: If the service provider fails to update
         """
 
@@ -193,7 +207,8 @@ class ServiceProviderRepository:
             if not service_provider:
                 raise ServiceProviderNotFound()
 
-            # this is a put, so we delete everything and then re-insert it in a transaction
+            # this is a put, so we delete everything and then re-insert it in a
+            # transaction
             db.delete(service_provider)
 
             service_provider = models.ServiceProvider(
@@ -248,7 +263,7 @@ class ServiceProviderRepository:
         return service_providers
 
     #######################
-    ### private methods ###
+    # private methods ###
     #######################
 
     @staticmethod
@@ -277,25 +292,15 @@ class ServiceProviderRepository:
             Query: The query with the joins performed.
         """
 
-        query = db.query(models.ServiceProvider).order_by(
-            models.ServiceProvider.cost_in_pence.desc()
+        query = (
+            db.query(models.ServiceProvider)
+            .having(coalesce(func.avg(models.Reviews.rating), 0) >= filters.reviews_gt)
+            .having(coalesce(func.avg(models.Reviews.rating), 0) <= filters.reviews_lt)
+            .outerjoin(models.Reviews)
+            .group_by(models.ServiceProvider.id)
+            .order_by(models.ServiceProvider.cost_in_pence.desc())
+            .order_by(func.avg(models.Reviews.rating).desc())
         )
-
-        # add the review conditions if there are any reviews
-        if (
-            db.query(models.Reviews)
-            .filter(models.Reviews.service_provider_id == models.ServiceProvider.id)
-            .count()
-        ):
-            query = (
-                (
-                    query.join(models.Reviews)
-                    .having(func.avg(models.Reviews.rating) >= filters.reviews_gt)
-                    .having(func.avg(models.Reviews.rating) <= filters.reviews_lt)
-                )
-                .group_by(models.ServiceProvider.id)
-                .order_by(func.avg(models.Reviews.rating).desc())
-            )
 
         # relationship filters have to work using joins as sqlalchemy doesn't support
         # filtering on relationships with the in_ operator

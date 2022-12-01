@@ -24,7 +24,8 @@ def test_list_service_providers_name_filter(
 
     Args:
         test_client (TestClient): The test client fixture.
-        create_multiple_service_providers_in_db (models.ServiceProvider): The service provider fixture.
+        create_multiple_service_providers_in_db (models.ServiceProvider): The service
+            provider fixture.
         name (str): The name to filter by.
         expected_provider (str): The expected provider name to get back over the API.
     """
