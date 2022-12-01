@@ -1,3 +1,6 @@
+"""Module containing functions and classes that are used
+as FastAPI dependencies."""
+
 from typing import Optional
 from datetime import date
 
@@ -7,6 +10,7 @@ from pydantic import root_validator, validator
 from sqlalchemy.orm import Session
 
 from service_provider_api.database.database import SessionLocal
+from service_provider_api.core.utils import list_pairs
 
 
 def get_db() -> Session:
@@ -23,15 +27,25 @@ def get_db() -> Session:
         db.close()
 
 
-def list_pairs(sequence):
-    if not sequence:
-        return []
-    it = iter(sequence)
-    return zip(it, it)
-
-
 @dataclass
 class ServiceProviderRecomendationParams:
+    """A class used to represent the parameters used to filter recommended
+    service providers.
+
+    A class has been used as there are multiple parameters that need to be
+    validated together & because there are a large number of parameters.
+
+    Args:
+        page (int, optional): The page number to return. Defaults to 1.
+        page_size (int, optional): The number of results to return per page.
+            Defaults to 10.
+        expected_job_duration_in_days (int, optional): The expected duration
+            of the job in days. Defaults to 1.
+        job_budget_in_pence (int, optional): The maximum budget for the job.
+        skills (list, optional): A list of skills that the service provider has.
+        minimum_review_rating (float, optional): The minimum review rating.
+    """
+
     page: int = Query(default=1, ge=1)
     page_size: int = Query(default=10, ge=1)
     expected_job_duration_in_days: int = Query(default=1, ge=1)
@@ -59,6 +73,27 @@ class ServiceProviderRecomendationParams:
 
 @dataclass
 class ListFilterParams:
+    """A class used to represent the parameters used to filter listed
+    service providers.
+
+    A class has been used as there are multiple parameters that need to be
+    validated together & because there are a large number of parameters.
+
+    Args:
+        page (int, optional): The page number to return. Defaults to 1.
+        page_size (int, optional): The number of results to return per page.
+            Defaults to 10.
+
+        reviews_lt (int, optional): The maximum average review of the service provider.
+        reviews_gt (int, optional): The minimum average review of the service provider.
+        name (str, optional): The name of the service provider to filter by.
+        skills (list, optional): A list of skills that the service provider needs.
+        cost_gt (int, optional): The minimum cost of the service provider.
+        cost_lt (int, optional): The maximum cost of the service provider.
+        availability (list, optional): A list of dates ranges that the service provider
+            has to be available.
+    """
+
     page: int = Query(default=1, ge=1)
     page_size: int = Query(default=10, ge=1)
     reviews_gt: float = Query(default=0, ge=0, le=5)

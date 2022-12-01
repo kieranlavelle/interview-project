@@ -1,3 +1,8 @@
+"""A module containing the FastAPI application.
+
+Most of the application setup should be done here.
+"""
+
 from fastapi import FastAPI
 from fastapi_versioning import VersionedFastAPI, version
 
@@ -21,6 +26,14 @@ app.include_router(service_provider_aggregations.router)
 @app.get("/health")
 @version(1, 0)
 async def health() -> dict:
+    """A health check endpoint.
+
+    This endpoint should always return a 200 status code if the server is up.
+
+    Returns:
+        dict: A dictionary containing the health status.
+    """
+
     return {"status": "ok"}
 
 
