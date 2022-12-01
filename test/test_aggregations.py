@@ -1,3 +1,6 @@
+"""Module holds all of the tests relating to
+the aggregation endpoints in the API."""
+
 from http import HTTPStatus
 from datetime import date
 
@@ -17,9 +20,13 @@ def test_list_service_providers_name_filter(
     name: str,
     expected_provider: str,
 ):
-    """Test that the API returns a list of service providers.
+    """Test that the API returns a list of service providers when filtered by name.
 
-    Test that we can get a paginated list of service providers & filters work.
+    Args:
+        test_client (TestClient): The test client fixture.
+        create_multiple_service_providers_in_db (models.ServiceProvider): The service provider fixture.
+        name (str): The name to filter by.
+        expected_provider (str): The expected provider name to get back over the API.
     """
 
     response = test_client.get("/v1_0/service-providers", params={"name": name})
@@ -33,7 +40,7 @@ def test_list_service_providers_name_filter(
     # get the first service provider and check it is Dean Greene
     first_service_provider = matching_service_providers[0]
     if first_service_provider["name"] != expected_provider:
-        pytest.fail("Service provider name is not correct")
+        pytest.fail("Did not get back the expected service provider from the API.")
 
 
 @pytest.mark.parametrize(
@@ -46,9 +53,14 @@ def test_list_service_providers_skills_filter(
     skills: list[str],
     expected_providers: set[str],
 ):
-    """Test that the API returns a list of service providers.
+    """Test that the API returns a list of service providers when filtered
+    by their skills.
 
-    Test that we can get a paginated list of service providers & filters work.
+    Args:
+        test_client (TestClient): The test client fixture.
+        create_multiple_service_providers_in_db (models.ServiceProvider): The service provider fixture.
+        skills (list[str]): The skills to filter by.
+        expected_providers (set[str]): The expected provider names to get back over the API.
     """
 
     response = test_client.get("/v1_0/service-providers", params={"skills": skills})
@@ -62,7 +74,7 @@ def test_list_service_providers_skills_filter(
     # get the first service provider and check it is Dean Greene
     providers = {provider["name"] for provider in matching_service_providers}
     if providers != expected_providers:
-        pytest.fail("Service provider name is not correct")
+        pytest.fail("Did not get back the expected service provider from the API.")
 
 
 @pytest.mark.parametrize(
@@ -81,9 +93,14 @@ def test_list_service_providers_cost_filter(
     cost_gt: int,
     expected_providers: set[str],
 ):
-    """Test that the API returns a list of service providers.
+    """Test that the API returns a list of service providers filtered by cost.
 
-    Test that we can get a paginated list of service providers & filters work.
+    Args:
+        test_client (TestClient): The test client fixture.
+        create_multiple_service_providers_in_db (models.ServiceProvider): The service provider fixture.
+        cost_lt (int): The upper bound cost to filter by.
+        cost_gt (int): The lower bound cost to filter by.
+        expected_providers (set[str]): The expected provider names to get back over the API.
     """
 
     params = {"cost_lt": cost_lt, "cost_gt": cost_gt}
@@ -99,7 +116,7 @@ def test_list_service_providers_cost_filter(
     # get the service providers and check it
     providers = {provider["name"] for provider in matching_service_providers}
     if providers != expected_providers:
-        pytest.fail("Service provider name is not correct")
+        pytest.fail("Did not get back the expected service providers from the API.")
 
 
 @pytest.mark.parametrize(
@@ -117,9 +134,14 @@ def test_list_service_providers_review_filter(
     reviews_gt: float,
     expected_providers: set[str],
 ):
-    """Test that the API returns a list of service providers.
+    """Test that the API returns a list of service providers filtered by review.
 
-    Test that we can get a paginated list of service providers & filters work.
+    Args:
+        test_client (TestClient): The test client fixture.
+        create_multiple_service_provider_reviews_in_db (models.Reviews): The service provider reviews fixture.
+        reviews_lt (float): The upper bound review to filter by.
+        reviews_gt (float): The lower bound review to filter by.
+        expected_providers (set[str]): The expected provider names to get back over the API.
     """
 
     params = {"reviews_lt": reviews_lt, "reviews_gt": reviews_gt}
@@ -135,7 +157,7 @@ def test_list_service_providers_review_filter(
     # get the service providers and check it
     providers = {provider["name"] for provider in matching_service_providers}
     if providers != expected_providers:
-        pytest.fail("Service provider name is not correct")
+        pytest.fail("Did not get back the expected service provider from the API.")
 
 
 @pytest.mark.parametrize(
@@ -158,9 +180,13 @@ def test_list_service_providers_availability_filter(
     availability: list[str],
     expected_providers: set[str],
 ):
-    """Test that the API returns a list of service providers.
+    """Test that the API returns a list of service providers filtered by availability.
 
-    Test that we can get a paginated list of service providers & filters work.
+    Args:
+        test_client (TestClient): The test client fixture.
+        create_multiple_service_provider_reviews_in_db (models.Reviews): The service provider reviews fixture.
+        availability (list[str]): The availability to filter by.
+        expected_providers (set[str]): The expected provider names to get back over the API.
     """
 
     params = {"availability": availability}
@@ -175,7 +201,7 @@ def test_list_service_providers_availability_filter(
     # get the service providers and check it
     providers = {provider["name"] for provider in matching_service_providers}
     if providers != expected_providers:
-        pytest.fail("Did not get the expected service providers")
+        pytest.fail("Did not get back the expected service providers from the API.")
 
 
 @pytest.mark.parametrize(
@@ -217,6 +243,19 @@ def test_can_get_recommended_service_providers(
     availability: list[str],
     expected_providers: set[str],
 ):
+    """Test that the API returns a list of recommended service providers according
+    to the given parameters.
+
+    Args:
+        test_client (TestClient): The test client fixture.
+        create_multiple_service_provider_reviews_in_db (models.Reviews): The service provider reviews fixture.
+        min_rating (int): The upper bound rating to filter by.
+        skills (list[str]): The skills to filter by.
+        expected_days (int): The expected days to complete the project.
+        budget (int): The budget of the project.
+        availability (list[str]): The availability to filter by.
+        expected_providers (set[str]): The expected provider names to get back over the API.
+    """
 
     params = {
         "expected_job_duration_in_days": expected_days,
@@ -236,13 +275,19 @@ def test_can_get_recommended_service_providers(
     # get the service providers and check it
     providers = {provider["name"] for provider in matching_service_providers}
     if providers != expected_providers:
-        pytest.fail("Service provider name is not correct")
+        pytest.fail("Did not get back the expected service providers from the API.")
 
 
 def test_pagintation(
     test_client: TestClient,
     create_multiple_service_provider_reviews_in_db: models.Reviews,
 ):
+    """Test that the API returns a list of service providers that can be paginated.
+
+    Args:
+        test_client (TestClient): The test client fixture.
+        create_multiple_service_provider_reviews_in_db (models.Reviews): The service provider reviews fixture.
+    """
 
     response = test_client.get(
         "/v1_0/service-providers", params={"page": 1, "page_size": 1}
